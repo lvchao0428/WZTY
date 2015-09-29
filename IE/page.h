@@ -57,17 +57,6 @@ typedef struct Lable
 
 }Lable, *pLable;
 
-LableType check_lable(char* line);
-
-int mycatNoN(char* dest, char* from);
-
-int find_str_times(char* str, char* word);
-
-int return_son_str_pos(char* father, char* son);
-
-int print_str(char* str, int beg, int end);
-
-int mystrstr(char* father, char* son);
 
 int mystrcpy(char* dest, char* from, int begPos, int endPos);
 
@@ -90,14 +79,6 @@ int read_title(char* filename, char* buf_title);
 int read_author(char* filename, char* buf_author);
 
 int deal_title(LineBuf** lb, Page* page);
-
-int deal_time(LineBuf** lb, Page* page);
-
-int deal_clickAndreplay(LineBuf** lf, Page* page);
-
-int deal_author(LineBuf** lf, Page* page);
-
-int desl_content(LineBuf** lf, Page* page);
 
 
 

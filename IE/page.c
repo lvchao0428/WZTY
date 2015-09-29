@@ -181,31 +181,48 @@ int fill_the_page(LineBuf* pb, Page* page)
 	  num++;
 	  LableType lt;
 	  //title，如果开头是title则是标题项，继续向后面找到结束标签即可
-
-	  lt = check_lable(line);
-	  switch(lt)
+	  switch(line[1])
 	  {
-		 case TITLELABLE:
+		 case 't':
 			//有可能是title项
+			//check lable
+			lt = check_lable(line);
+			if(lt == TITLELABLE)
+			{
 			   deal_title(&p, page);
-			
 			   //  printf("title type ,   %s", line);
-			   break;
-		 case CONTENTLABLE:
+			}
+			if(lt == CONTENTLABLE)
+			{
 			   deal_content(&p, page);
 			   //	   printf("content type ,   %s", line);
+			}
 			break;
-		 case AUTHORLABLE:
+		 case 'd':
 			//有可能是div项。如果是div项则有可能是作者项，要查看属性里面的class是否是authi
+			lt = check_lable(line);
+			if(lt == AUTHORLABLE)
+			{
 			   deal_author(&p, page);
+			}
 			break;
-		 case TIMELABLE:
+		 case 'e':
 			//有可能是em标签，如果是em标签则有可能是发表时间项,如果后面的id属性包含authorposton则是发表时间
+			lt = check_lable(line);
+			if(lt == TIMELABLE)
+			{
 			   deal_time(&p, page);
+
+			}
 			break;
-		 case REPLAYLABLE:
+		 case 's':
+			//有可能是span标签，如果是span标签则检查被此span标签包含的文字，如果是的查看则后面
 			//是查看次数，点击次数继续搜寻即可
+			lt = check_lable(line);
+			if(lt == REPLAYLABLE)
+			{
 			   deal_clickAndreplay(&p, page);
+			}
 			break;
 		 default:
 			break;
@@ -816,6 +833,65 @@ int read_queue(buf_queue* bq)
 
    return 1;
 }
+
+/*
+   int read_title(buf_queue* bq, char* buf_title)
+   {
+   if(bq->next == NULL)
+   {
+   perror("null buf queue");
+   return 0;
+   }
+
+   buf_queue* p = bq->next;
+
+   while(p != NULL)
+   {
+   char temp[10];
+   int i = 0;
+   if(bq->buf[0] != '<' || bq->buf[1] != 't')
+   {
+   continue;
+   }
+
+   while(bq->buf[i] != '\0')
+   {
+
+   if(i < 8)
+   {
+   temp[i++] = bq->buf[i];
+   }
+   else if(i == 8)
+   {
+   temp[i] = '\0';
+   i++;
+   }
+   else
+   {
+   if(strcmp(temp, "<title>") == 0)
+   {
+   if(bq->buf[i] != '<')
+   {
+   buf_title[i++] = bq->buf[i];
+   }
+   else
+   {
+   buf_title[i++] = '\0';
+   break;
+   }
+   }
+   else
+   {
+   continue;
+   }
+   }
+
+   }
+
+   }
+   return strlen(buf_title);
+   }
+   */
 
 int read_title(char* filename, char* buf_title)
 {
