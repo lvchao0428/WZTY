@@ -27,13 +27,16 @@ int main(int argc, char* argv[])
    lb->next = NULL;
 
    fill_buf(argv[1], lb);
+
    fill_the_page(lb, &page);
+
    printf("title:%s\n", page.title);
    printf("content:%s\n", page.content);
    printf("author:%s\n", page.author);
    printf("click num:%s\n", page.click_count);
    printf("replay num:%s\n", page.replay_count);
    printf("time:%s\n", page.time);
-   
+//   test_line_buf(lb);
+//   free_page(&page);
    return 0;
 }

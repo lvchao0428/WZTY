@@ -13,15 +13,6 @@
 #include"page.h"
 #include<errno.h>
 
-#define BUFSIZE 1024
-
-typedef int LableType;
-#define TITLELABLE		0
-#define AUTHORLABLE		1
-#define TIMELABLE		2
-#define CLICKNUMLABLE	3
-#define REPLAYLABLE		4
-#define CONTENTLABLE	5
 
 
 int fill_buf(char* filename, LineBuf* lb)
@@ -70,25 +61,13 @@ int fill_buf(char* filename, LineBuf* lb)
    free(line);
 }
 
-void test_fillbuf(LineBuf* lb)
+void test_line_buf(LineBuf* lf)
 {
-   LineBuf* p = lb->next;
-   int no = 0;
+   LineBuf* p = lf->next;
    while(p != NULL)
    {
-	  no++;
-	  printf("len: %d, %s\n",strlen(p->str), p->str );
+	  printf("%s\n", p->str);
 	  p = p->next;
-   }
-}
-
-void testtwostar(LineBuf** lb)
-{
-   LineBuf* ll = (*lb)->next;
-   while(ll != NULL)
-   {
-	  printf("lien:%s\n", ll->str);
-	  ll = ll->next;
    }
 }
 
@@ -125,7 +104,7 @@ int mystrstr(char* father, char* son)
 }
 
 int file_read_full(char** dest, const char* filename)
-{
+{//把整个文件读成一个字符串
    FILE* fp;
    struct stat file_stats;
    int nItems, nBytesRead;
@@ -156,14 +135,8 @@ int file_read_full(char** dest, const char* filename)
 }
 
 int fill_the_page(LineBuf* pb, Page* page)
-{
-   int title_len;
-   int author_len;
-   int time_len;
-   int click_count_len;
-   int repaly_count_len;
-   int content_len;
-
+{//提取论坛内容
+   
    char* line = NULL;
    LineBuf* p = pb->next;
    int num = 0;
@@ -171,7 +144,6 @@ int fill_the_page(LineBuf* pb, Page* page)
    {
 	  line = p->str;
 	  int i = 0;
-	  char temp[50];
 	  //所有属性都是‘<’打头，所以如果是'.''{'开头的则不是属性项
 	  if(line[i] != '<')
 	  {
@@ -180,36 +152,59 @@ int fill_the_page(LineBuf* pb, Page* page)
 	  }
 	  num++;
 	  LableType lt;
-	  //title，如果开头是title则是标题项，继续向后面找到结束标签即可
 
 	  lt = check_lable(line);
+	
 	  switch(lt)
 	  {
 		 case TITLELABLE:
 			//有可能是title项
+		
+		   if(page->title_filled != 1)
+			{
 			   deal_title(&p, page);
-			
-			   //  printf("title type ,   %s", line);
-			   break;
+			}
+		
+			printf("title type ,%s\n", line);
+			break;
 		 case CONTENTLABLE:
+			if(page->content_filled != 1)
+			{
 			   deal_content(&p, page);
-			   //	   printf("content type ,   %s", line);
+			}
+			printf("content type ,%s\n", line);
 			break;
 		 case AUTHORLABLE:
 			//有可能是div项。如果是div项则有可能是作者项，要查看属性里面的class是否是authi
+			
+			if(page->author_filled != 1)
+			{
 			   deal_author(&p, page);
+			}
+			
+			 printf("author typoe,%s\n", line);
 			break;
 		 case TIMELABLE:
 			//有可能是em标签，如果是em标签则有可能是发表时间项,如果后面的id属性包含authorposton则是发表时间
+			if(page->time_filled != 1)
+			{
 			   deal_time(&p, page);
+			}
+			
+			printf("time typoe,%s\n", line);
 			break;
 		 case REPLAYLABLE:
 			//是查看次数，点击次数继续搜寻即可
+			if(page->click_filled != 1)
+			{
 			   deal_clickAndreplay(&p, page);
+			}
+			printf("replay type,%s\n", line);
 			break;
 		 default:
 			break;
 	  }
+	  
 	  p = p->next;
 
    }
@@ -218,7 +213,7 @@ int fill_the_page(LineBuf* pb, Page* page)
 }
 
 LableType check_lable(char* line)
-{
+{//检查此行标签的可能内容，并返回可能的标签
    int i = 0;
    LableType lt = -1;
    char lable[60];
@@ -232,27 +227,35 @@ LableType check_lable(char* line)
    lable[j] = '\0';
 
    printf("test check lable: %s\n", lable);
-
+//   printf("line:%s\n", line);
    if(strcmp(lable, "<title") == 0)
    {
 	  lt = TITLELABLE;
+	  printf("title checked\n");
    }
-   else if(strcmp(lable, "<div") == 0)
+   //内容标签里面有可能包含的postmessage
+   else if((strcmp(lable, "<div") == 0) && mystrstr(line, "authi"))
    {
 	  lt = AUTHORLABLE;
+
+	  printf("author checked\n");
    }
-   else if(strcmp(lable, "<em") == 0)
+   else if(mystrstr(line, "authorposton") == 1)
    {
 	  lt = TIMELABLE;
+	  printf("time checked\n");
    }
-   else if(strcmp(lable, "<span") == 0)
+   
+   else if(mystrstr(line, "查看") && mystrstr(line, "回复"))
    {
 	  lt = REPLAYLABLE;
+	  printf("replay checked\n");
    }
-   //此个网页内容部分包含在talbe中，以后可以在这里扩展内容页可能存在的标签
-   else if(strcmp(lable, "<table") == 0)
-   {
+   else if(((strcmp(lable, "<div") == 0) || (strcmp(lable, "<table") == 0)) && 
+		 ((mystrstr(line, "postmessage") == 1 || (mystrstr(line, "pid") == 1))))
+   {//此个网页内容部分包含在talbe中，以后可以在这里扩展内容页可能存在的标签
 	  lt = CONTENTLABLE;
+	  printf("content checked\n");
    }
 
    return lt;
@@ -398,39 +401,25 @@ int print_str(char* str, int beg, int end)
 int deal_time(LineBuf** lf, Page* page)
 {
    LineBuf* templf = *lf;
-   char tempstr[2000];
-   tempstr[0] = '\0';
    LineBuf* endlf = templf;
-
-   if(mystrstr(endlf->str, "authorposton") != 1)
-   {
-	  return 0;
-   }
+   char* line = endlf->str;
+   
    printf("str: %s\n", endlf->str); 
    int begPos = 0, endPos = 0;
    //find begPos
-   while(tempstr[begPos] != '\0')
-   {
-	  if(tempstr[begPos] == '>')
-	  {
-		 break;
-	  }
-	  begPos++;
-   }
+   while(line[begPos] != '\0' && line[begPos++] != '>');
    endPos = begPos;
-   printf("begpos:%d\n", begPos);
-   while(tempstr[endPos] != '\0')
-   {
-	  if(tempstr[endPos] == '<')
-	  {
-		 break;
-	  }
-	  endPos++;
-   }
-   printf("endpos:%d\n", endPos);
-   page->time = (char*)malloc(sizeof(char)*100);
-   mystrcpy(page->time, tempstr, begPos, endPos);
-
+   
+   printf("time begin: %d\n", begPos);
+   //find endPos
+   while(line[endPos] != '\0' && line[endPos] != '<') endPos++;
+   
+   printf("time end: %d\n", endPos);
+   page->time = (char*)malloc(sizeof(char)*(endPos-begPos+1));
+   mystrcpy(page->time, line, begPos, endPos);
+   page->time_filled = 1;
+   templf = templf->next;
+   return 1;
 }
 
 
@@ -446,8 +435,6 @@ int deal_clickAndreplay(LineBuf** lf, Page* page)
    {
 	  return 0;
    }
-  // printf("after check chakan %s\n", endlf->str);
-   //printf("begin </span>\n");
    do{
 	  if(mystrstr(endlf->str, "</span>") == 1)
 	  {
@@ -553,7 +540,7 @@ int deal_clickAndreplay(LineBuf** lf, Page* page)
    printf("replay end pos:%d\n", replayendPos);
    page->replay_count = (char*)malloc(sizeof(char)*10);
    mystrcpy(page->replay_count, tempstr, replaybegPos, replayendPos);
-
+   page->replay_filled = 1;
    return 1;
 }
 
@@ -563,58 +550,23 @@ int deal_author(LineBuf** lf, Page* page)
 {
    LineBuf* templf = *lf;
    char* line = templf->str;
-   //同样查询div标签里面的class值，如果包含authi，则把整个div的包含部分double取
-   //出来，如果在查询一次authi出现的次数，如果只出现一次，则为用户名字段
-   char tempstr[2000];
-   tempstr[0] = '\0';
-   //div标签不会换行显示，也即class一定在div的头标签里面
-   //如果头标签包含authi，就继续找到</div>出现的位置，并把全部的标签内容包含
-   //到一起，搜寻authi出现的次数
    LineBuf* endlf = templf;
-   if(mystrstr(endlf->str, "authi") != 1){
-	  return 0;
-   }
 
-   while(mystrstr(endlf->str, "</div>") != 1)
-   {
-	  endlf = endlf->next;
-   }
-
-   do
-   {
-   	  mycatNoN(tempstr, templf->str);
-   	  templf = templf->next;
-   }while(templf != NULL && templf != endlf);
-   
-   if(find_str_times(tempstr, "authi") != 1)
-   {
-	  return 0;
-   }
-   int endPos = strlen(tempstr), begPos = 0;
-   //find end pos
-   while(endPos--)
-   {
-	  if(tempstr[endPos] == '<' && tempstr[endPos-1] != '>')
-	  {
-		 break;
-	  }
-   }
-
-   //find beg pos
-   while(begPos != endPos)
-   {
-	  if(tempstr[begPos] == '>' && tempstr[begPos + 1] != '<')
-	  {
-		 begPos++;
-		 break;
-	  }
-
-	  begPos++;
-   }
+   int begPos = 0, endPos = 0;
+   //find begPos
+   begPos = return_son_str_pos(line, "authi");
+   //让begPos直接跳过div的开始标签
+   begPos += 2;
+   while(line[begPos] != '\0' && line[begPos++] != '>');
+   //find endPos
+   endPos = begPos;
+   while(line[endPos] != '\0' && line[endPos] != '<') endPos++;
 
    page->author = (char*)malloc(sizeof(endPos-begPos+1));
-   mystrcpy(page->author, tempstr, begPos, endPos);
-   lf = &endlf;
+   mystrcpy(page->author, line, begPos, endPos);
+   
+   endlf = endlf->next;
+   page->author_filled = 1;
    return 1;
 }
 
@@ -622,79 +574,127 @@ int deal_author(LineBuf** lf, Page* page)
 int deal_content(LineBuf** lf, Page* page )
 {
    LineBuf* templf = *lf; 
-   char* line = templf->str;
    //假设网页都是合理的网页，则找到table标签的结束标签
    //在这个函数里面吧table标签的头尾连接起来，并且改变buf的指针
    //把table的信息存储在一个字符串里面然后进行查找最内层内容。
    int nlen = 0;
-   char tempstr[10000] = "";
+   char tempstr[100000];
    tempstr[0] = '\0';
    LineBuf* endlf = templf;
-    
-   do
+   
+   
+   while(endlf != NULL && (mystrstr(endlf->str, "</table>") != 1))
    {
 	  nlen += strlen(endlf->str);
-
+	  mycatNoN(tempstr, endlf->str);
 	  endlf = endlf->next;	  
-	  if(mystrstr(endlf->str, "</table>") == 1)
-	  {
-		// printf("fined line:%s\n", endlf->str);
-	  }
-   }while(endlf != NULL && mystrstr(endlf->str, "</table>") != 1);
-
-   //printf("nlen:%d\n", nlen);
-   
-
-
-   //把table闭合标签里面的内容存起来再分析
-   //char* str_wholeTableContent = (char*)malloc(sizeof(char)*(nlen+1))
-   do
-   {
-	  mycatNoN(tempstr, templf->str);
-	  //strcat(tempstr, templf->str);
-	  templf = templf->next;
-   }while(templf != NULL && templf != endlf);
-   strcat(tempstr, templf->str);
-  
-   //如果里面没有标记位就不是内容项
-   if(mystrstr(tempstr, "postmessage") != 1)
+   }
+   nlen += strlen(endlf->str);
+   mycatNoN(tempstr, endlf->str);
+   //如果table标签在一行里面出现了超过2则为段内容或无内容标签，根据书写习惯判定为非内容字段
+   if(find_str_times(tempstr, "table") > 2)
    {
 	  return 0;
    }
 
-   int endPos, begPos = 0;
-   //找到内容的结束位置
-   endPos = strlen(tempstr);
-   
-   while(endPos--)
-   {
-	  if(tempstr[endPos] == '<' && tempstr[endPos-1] != '>')
-	  {
-		 break;
-	  }
-   }
-   
-   //找到开始内容的位置
-   while(begPos != endPos)
-   {
-	  if(tempstr[begPos] == '>' && tempstr[begPos+1] != '<')
-	  {
-		 break;
-	  }
-	  begPos++;
-   }
-   //printf("begpos:%d, endPos:%d\n", begPos, endPos);
-   begPos++;
+   printf("tempcontentline: %s\n", tempstr);
 
-   //printf("tempstr:%s\n", tempstr);
-   page->content = (char*)malloc(sizeof(char)*(2048 + 1));
+   //把table闭合标签里面的内容存起来再分析
+    //内容提取的要素是，table标签里面的内容，有嵌套标签包含的都去掉
+   int begPos = 0, endPos = nlen+1;
+	
+	//find begin table end
+   while(tempstr[begPos] != '\0' && tempstr[begPos++] != '>'); 
+   //find end table begin
+   while(endPos > 0 && tempstr[endPos] != '<') endPos--;
+   //dispose son lable
+
+
+   page->content = (char*)malloc(sizeof(char)*(endPos-begPos + 1));
    mystrcpy(page->content, tempstr, begPos, endPos);
-   //printf("cpy end\n"); 
-   lf = &endlf;
+
+   //把嵌套子标签去掉
+   LablePosPair* lpp = (LablePosPair*)malloc(sizeof(LablePosPair));
+   lpp->next = NULL;
+   LablePosPair* p = lpp;
+   int i = 0;
+   char* line = page->content; 
+   //找到所有'<'的位置
+   while(line[i] != '\0')
+   {
+	  if(line[i] == '<' && ((line[i+1] > 'a' && line[i+1] < 'z') || line[i+1] == '/'))
+	  {
+		 LablePosPair* q = (LablePosPair*)malloc(sizeof(LablePosPair));
+		 q->left = i;
+		 q->next = NULL;
+		 p->next = q;
+		 p = p->next;
+	  }
+	  i++;
+   }
+
+   p = lpp->next;
+   i = 0;
+   int j = 0;
+   while(line[i] != '\0' && p != NULL)
+   {
+	  j = p->left;
+	  //find right
+	  while(line[j] != '>') j++;
+	  p->right = j;
+	  p = p->next;
+	  i++;
+   }
+   test_lpp(lpp);
+   //把除去标签的部分都赋值给内容项
+
+   
+   dispos_son_lable(page->content, lpp);   
+
+
+   endlf = endlf->next;
+   page->content_filled = 1;
+
    return 1;
 }
 
+void dispos_son_lable(char* str, LablePosPair* lpp)
+{
+   LablePosPair* p = lpp->next;
+   int i = 0, j = 0;
+   while(str[i] != '\0')
+   {
+	  if(p != NULL)
+	  {
+		 i = p->right;
+		 i++;
+		 p = p->next;
+	  }
+	  else
+	  {
+		 while(str[i] != '\0')
+		 {
+			str[j++] = str[i++];
+		 }
+	  }
+	  while(str[i] != '\0' && str[i] != p->left) 
+	  {
+		 str[j++] = str[i++]; 
+	  }
+	  
+	  
+   }
+}
 
+void test_lpp(LablePosPair* lpp)
+{
+   LablePosPair* p = lpp->next;
+   while(p != NULL)
+   {
+	  printf("left: %d, right: %d\n", p->left, p->right);
+	  p = p->next;
+   }
+}
 
 //处理标题
 int deal_title(LineBuf** lf, Page* page)
@@ -702,43 +702,26 @@ int deal_title(LineBuf** lf, Page* page)
    int i = 0;
    char lable[10];
    int j = 0;
+   LineBuf* templf = *lf;
    char* line = (*lf)->str;
-   if(line[0] != '<')
-   {
-	  return 0;
-   }
-   int title_len = 0;
-   char temptitle[100];
-   while(line[i] != '\0')
-   {
-	  if(i < 7)
-	  {
-		 lable[i] = line[i];
-	  }
-	  if(i == 7)
-	  {
-		 lable[i] = '\0';
-		 //		 printf("lable:%s\n", lable);
-		 if(strcmp(lable, "<title>") != 0)
-		 {
-			return 0;
-		 }
-	  }
+   char temptitle[300];
+   printf("%s\n", line);
+   int begPos = 0, endPos = 0;
 
-	  if(i >= 7)
-	  {
-		 if(line[i] != '<')
-			temptitle[j++] = line[i];
-		 else
-		 {
-			temptitle[j] = '\0';
-			page->title = (char*)malloc(strlen(temptitle) + 1);
-			strcpy(page->title, temptitle);
-			return strlen(temptitle);
-		 }
-	  }
-	  i++;
-   }
+   //find begPos
+   while(line[begPos] != '\0' && line[begPos++] != '>');
+   //find endPos
+   endPos = begPos;
+   while(line[endPos] != '\0' && line[endPos] != '<') endPos++;
+   printf("begpos: %d\n", begPos);
+   printf("endpos: %d\n", endPos);
+
+   page->title = (char*)malloc(sizeof(char)*(endPos-begPos+1));
+   mystrcpy(page->title, line, begPos, endPos);
+   
+   templf = templf->next;
+   page->title_filled = 1;
+   return 1;
 }
 
 int Enqueue(buf_queue* bq, char* buf)

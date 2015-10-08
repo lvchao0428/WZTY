@@ -5,6 +5,16 @@
 #include<stdlib.h>
 #include<malloc.h>
 
+#define BUFSIZE 1024
+
+typedef int LableType;
+#define TITLELABLE		0
+#define AUTHORLABLE		1
+#define TIMELABLE		2
+#define CLICKNUMLABLE	3
+#define REPLAYLABLE		4
+#define CONTENTLABLE	5
+
 typedef struct Page
 {
    char* title;
@@ -13,6 +23,12 @@ typedef struct Page
    char* click_count;
    char* replay_count;
    char* content;
+   int title_filled;
+   int author_filled;
+   int time_filled;
+   int click_filled;
+   int replay_filled;
+   int content_filled;
 }Page, *pPage;
 
 void free_page(Page* page);
@@ -57,48 +73,65 @@ typedef struct Lable
 
 }Lable, *pLable;
 
-LableType check_lable(char* line);
+//存储大于号和小于号的位置，定位内容项里面的子标签
+typedef struct LablePosPair
+{
+   int left;
+   int right;
+   struct LablePosPair* next;
+}LablePosPair, *pLablePosPair;
 
-int mycatNoN(char* dest, char* from);
+LableType check_lable(char* line);		//检查此标签的对应内容的类型
 
-int find_str_times(char* str, char* word);
+int mycatNoN(char* dest, char* from);			//把后面的字符串拼接到前面字符串，忽略换行符
 
-int return_son_str_pos(char* father, char* son);
+int find_str_times(char* str, char* word);		//寻找后面字符串在前面字符串中出现的次数
 
-int print_str(char* str, int beg, int end);
+int return_son_str_pos(char* father, char* son);	//返回第一次出现son字符串的结束位置
 
-int mystrstr(char* father, char* son);
+int print_str(char* str, int beg, int end);		//打印beg到end里面的字符串
 
-int mystrcpy(char* dest, char* from, int begPos, int endPos);
+int mystrstr(char* father, char* son);			//测试前面字符串里面是否包含后面的字符串
 
-void testtwostart(LineBuf** lb);
+int mystrcpy(char* dest, char* from, int begPos, int endPos);	//把from字符串的下表范围里面的字符串拷贝到前面字符串
 
-int Enqueue(buf_queue* bf, char* buf);
+//处理内容项
+void test_lpp(LablePosPair* lpp);		//测试posPair
 
-int Dequeue(buf_queue* bf, char* buf);
-
-int fill_the_page(LineBuf* pb, Page* page);
-   
-int read_html(char* url, buf_queue* bq);
-
-int read_queue(buf_queue* bq);
-
-//int read_title(buf_queue* bq, char* buf_title);
-
-int read_title(char* filename, char* buf_title);
-
-int read_author(char* filename, char* buf_author);
-
-int deal_title(LineBuf** lb, Page* page);
-
-int deal_time(LineBuf** lb, Page* page);
-
-int deal_clickAndreplay(LineBuf** lf, Page* page);
-
-int deal_author(LineBuf** lf, Page* page);
-
-int desl_content(LineBuf** lf, Page* page);
+void dispos_son_lable(char* str, LablePosPair* lpp);
 
 
+int file_read_full(char** dest, const char* filename);		//把整个文件读取成一个字符串
+
+int Enqueue(buf_queue* bf, char* buf);			//固定块入队操作
+
+int Dequeue(buf_queue* bf, char* buf);			//固定块出队操作
+
+int fill_the_page(LineBuf* pb, Page* page);		//把行结构信息提取出需要的所有需要信息
+
+int fill_buf(char* filename, LineBuf* lb);		//把文件内容按行读入
+
+int read_html(char* url, buf_queue* bq);		//把文件内容按固定大小块读入
+
+int read_queue(buf_queue* bq);					//读取固定块大小的文件内容
+
+
+int read_title(char* filename, char* buf_title);	//从文件读取文章的标题内容
+
+int read_author(char* filename, char* buf_author);	//从文件读取作者名字
+
+int deal_title(LineBuf** lb, Page* page);			//从行存储结构中读取标题内容
+
+int deal_time(LineBuf** lb, Page* page);			//从行存储结构中读取时间内容
+
+int deal_clickAndreplay(LineBuf** lf, Page* page);	//从行存储结构中读取点击和回复数据
+
+int deal_author(LineBuf** lf, Page* page);			//从行存储结构中读取作者信息
+
+int deal_content(LineBuf** lf, Page* page);			//从行存储结构中读取内容信息
+
+void free_page(Page* page);		//释放页面结构体成员
+//test
+void test_line_buf(LineBuf* lf);
 
 #endif
