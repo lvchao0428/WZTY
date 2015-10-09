@@ -81,6 +81,10 @@ typedef struct LablePosPair
    struct LablePosPair* next;
 }LablePosPair, *pLablePosPair;
 
+
+//把时间转化成统一的格式
+
+
 LableType check_lable(char* line);		//检查此标签的对应内容的类型
 
 int mycatNoN(char* dest, char* from);			//把后面的字符串拼接到前面字符串，忽略换行符

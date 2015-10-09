@@ -622,7 +622,7 @@ int deal_content(LineBuf** lf, Page* page )
    //找到所有'<'的位置
    while(line[i] != '\0')
    {
-	  if(line[i] == '<' && ((line[i+1] > 'a' && line[i+1] < 'z') || line[i+1] == '/'))
+	  if(line[i] == '<' && ((line[i+1] >= 'a' && line[i+1] <= 'z') || line[i+1] == '/'))
 	  {
 		 LablePosPair* q = (LablePosPair*)malloc(sizeof(LablePosPair));
 		 q->left = i;
@@ -647,10 +647,7 @@ int deal_content(LineBuf** lf, Page* page )
    }
    test_lpp(lpp);
    //把除去标签的部分都赋值给内容项
-
-   
    dispos_son_lable(page->content, lpp);   
-
 
    endlf = endlf->next;
    page->content_filled = 1;
@@ -677,13 +674,14 @@ void dispos_son_lable(char* str, LablePosPair* lpp)
 			str[j++] = str[i++];
 		 }
 	  }
-	  while(str[i] != '\0' && str[i] != p->left) 
+	  while(str[i] != '\0' && i != p->left) 
 	  {
 		 str[j++] = str[i++]; 
 	  }
 	  
 	  
    }
+   str[j] = '\0';
 }
 
 void test_lpp(LablePosPair* lpp)
