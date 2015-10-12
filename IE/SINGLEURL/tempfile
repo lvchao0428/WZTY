@@ -1,0 +1,36 @@
+	  nlen += strlen(endlf->str);
+	  mycatNoN(tempstr, endlf->str);
+	  endlf = endlf->next;	  
+   }
+
+   nlen += strlen(endlf->str);
+   mycatNoN(tempstr, endlf->str);
+   //如果table标签在一行里面出现了超过2则为段内容或无内容标签，根据书写习惯判定为非内容字段
+   if(find_str_times(tempstr, "table") > 2)
+   {
+	  return 0;
+   }
+
+   printf("tempcontentline: %s\n", tempstr);
+
+   //把table闭合标签里面的内容存起来再分析
+    //内容提取的要素是，table标签里面的内容，有嵌套标签包含的都去掉
+   int begPos = 0, endPos = nlen+1;
+	
+	//find begin table end
+   while(tempstr[begPos] != '\0' && tempstr[begPos++] != '>'); 
+   //find end table begin
+   while(endPos > 0 && tempstr[endPos] != '<') endPos--;
+   //dispose son lable
+
+   page->content = (char*)malloc(sizeof(char)*(endPos-begPos + 1));
+   mystrcpy(page->content, tempstr, begPos, endPos);
+
+   //把嵌套子标签去掉
+   LablePosPair* lpp = (LablePosPair*)malloc(sizeof(LablePosPair));
+   lpp->next = NULL;
+   LablePosPair* p = lpp;
+  
+   find_all_greater_lower(page->content, p);
+
+   test_lpp(lpp);

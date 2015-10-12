@@ -1,0 +1,28 @@
+void dispos_son_lable(char* str, LablePosPair* lpp)
+{
+   LablePosPair* p = lpp->next;
+   int i = 0, j = 0;
+   while(str[i] != '\0')
+   {
+	  if(p != NULL)
+	  {
+		 i = p->right;
+		 i++;
+		 p = p->next;
+	  }
+	  else
+	  {
+		 while(str[i] != '\0')
+		 {
+			str[j++] = str[i++];
+		 }
+	  }
+	  while(str[i] != '\0' && i != p->left) 
+	  {
+		 str[j++] = str[i++]; 
+	  }
+	  
+	  
+   }
+   str[j] = '\0';
+}
