@@ -5,7 +5,14 @@
     > Created Time: Mon Oct 12 14:29:55 2015
  ************************************************************************/
 
-#include<stdio.h>
+#include"clean_res.h"
 
 
 
+void free_page(Page* page)
+{
+   free(page->title);
+   free(page->author);
+   free(page->time);
+   free(page->content);
+}

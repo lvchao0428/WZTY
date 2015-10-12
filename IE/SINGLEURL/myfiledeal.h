@@ -2,7 +2,7 @@
 #define _MYFILEDEAL_H_
 
 
-
+#include"def.h"
 
 
 int fill_buf(char* filename, LineBuf* lb);	//把文件内容读取到linebuf里面

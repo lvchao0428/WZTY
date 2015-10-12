@@ -2,7 +2,16 @@
 #define __DEF_H_
 
 #include<stdio.h>
+#include<stdlib.h>
 #include<string.h>
+#include<malloc.h>
+#include<sys/types.h>
+#include<sys/stat.h>
+#include<fcntl.h>
+#include<string.h>
+#include<errno.h>
+
+
 
 #define BUFSIZE 1024
 

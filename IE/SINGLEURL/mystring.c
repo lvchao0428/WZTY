@@ -5,7 +5,6 @@
     > Created Time: Sat Oct 10 17:51:23 2015
  ************************************************************************/
 
-#include<stdio.h>
 #include"mystring.h"
 
 
@@ -51,7 +50,7 @@ int mystrcpy(char* dest, char* from, int begPos, int endPos)
    }
    dest[j] = '\0';
 }
-
+/*
 int find_comma_num_out(char* line)
 {//找到字符串里面目标符号的数量
    int begPos, endPos;
@@ -71,7 +70,7 @@ int find_comma_num_out(char* line)
    while(p2 != NULL)
    {
 	  int j = 0;
-	  p1 = 
+	  //p1 = 
 	  while(j < 3)
 	  {
 		 comma_num += find_str_with_scope(line, comma[j], p->left, p->right);
@@ -82,7 +81,7 @@ int find_comma_num_out(char* line)
    
    return comma_num;
 }
-
+*/
 
 int find_str_with_scope(char* str, char* word, int begPos, int endPos)
 {//返回str里面，在begPos和endPos下标范围内，包含word的个数

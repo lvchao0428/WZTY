@@ -5,25 +5,22 @@
     > Created Time: Mon Oct 12 14:25:23 2015
  ************************************************************************/
 
-#include<stdio.h>
+#include"lable_deal.h"
+#include"mystring.h"
 
-
-int out_cotent_scope(char* line, LablePosPair* lpp)
-{//把字符串中内容项的范围存储到lpp里面，也即除去标签之外的内容部分的下表范围
+int out_content_scope(char* line, LablePosPair* lpp)
+{//把字符串中内容项的范围存储到lpp里面，也即除去标签之外的内容部分的下标范围
+   find_all_greater_lower(line, lpp);		//先把lpp里面存上大于号和小于号的位置，
+   //小于号和大于号之间即为内容范围
    LablePosPair* p = lpp->next;
-   LablePosPair* q = p;
    while(p->next != NULL)
    {
 	  p->left = p->right;
 	  p->right = p->next->left;
-	  
 	  p = p->next;
-	  if(p->next == NULL)
-	  {
-		 p->right = 0;
-	  }
-   }
 
+   }
+   p->right = strlen(line);
 }
 
 LableType check_lable(char* line)
@@ -101,7 +98,7 @@ void find_all_greater_lower(char* line, LablePosPair* lpp)
    {
 	  j = p->left;
 	  //find right
-	  while(line[j] != '>') j++;
+	  while(line[j++] != '>');
 	  p->right = j;
 	  p = p->next;
 	  i++;
@@ -118,7 +115,6 @@ void dispos_son_lable(char* str, LablePosPair* lpp)
 	  if(p != NULL)
 	  {
 		 i = p->right;
-		 i++;
 		 p = p->next;
 	  }
 	  else
@@ -136,4 +132,19 @@ void dispos_son_lable(char* str, LablePosPair* lpp)
 	  
    }
    str[j] = '\0';
+}
+
+void copy_scope_str_to_str(char* str, LablePosPair* lpp)
+{
+   LablePosPair* p = lpp->next;
+   int i = 0, j = 0;
+   while(str[i] != '\0')
+   {
+	  i = p->left;
+	  while(str[i] != '\0' && i != p->right)
+	  {
+		 str[j++] = str[i++];
+	  }
+	  p = p->next;
+   }
 }

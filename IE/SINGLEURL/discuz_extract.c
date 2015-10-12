@@ -5,7 +5,9 @@
     > Created Time: Mon Oct 12 14:28:13 2015
  ************************************************************************/
 
-#include<stdio.h>
+#include"discuz_extract.h"
+#include"lable_deal.h"
+#include"mystring.h"
 
 
 int discuz_fill_the_page(LineBuf* pb, Page* page)
@@ -13,7 +15,6 @@ int discuz_fill_the_page(LineBuf* pb, Page* page)
    
    char* line = NULL;
    LineBuf* p = pb->next;
-   int num = 0;
    while(p != NULL)
    {
 	  line = p->str;
@@ -24,20 +25,15 @@ int discuz_fill_the_page(LineBuf* pb, Page* page)
 		 p = p->next;
 		 continue;
 	  }
-	  num++;
 	  LableType lt;
 
-	  
-
 	  lt = check_lable(line);
-
-
 	  switch(lt)
 	  {
 		 case TITLELABLE:
 			//有可能是title项
 			if(page->title_filled != 1)
-			{
+			{//如果标题项还没有被填充过，则把之后内容当做标题处理
 			   deal_title(&p, page);
 			}
 
@@ -45,21 +41,34 @@ int discuz_fill_the_page(LineBuf* pb, Page* page)
 			break;
 		 case CONTENTLABLE:
 			if(page->content_filled != 1)
-			{
+			{//如果可能是内容选项，而且还没有被填充过，则当内容项处理时候的内容
 			   deal_content(&p, page);
 			}
 			printf("content type ,%s\n", line);
 			break;
 		 case AUTHORLABLE:
-			//有可能是div项。如果是div项则有可能是作者项，要查看属性里面的class是否是authi
-			
 			if(page->author_filled != 1)
-			{
+			{//如果被判定为可能的作者项，则把之后内容当做作者项处理
 			   deal_author(&p, page);
 			}
-
+			break;
+		 case TIMELABLE:
+			if(page->time_filled != 1)
+			{
+			   deal_time(&p, page);
+			}
+			break;
+		 case REPLAYLABLE:
+			if(page->replay_filled != 1)
+			{
+			   deal_clickAndreplay(&p, page);
+			}
+			break;
+		 default:
+			break;
 
 	  }
+	  p = p->next;
    }
 }
 
@@ -209,8 +218,6 @@ int deal_clickAndreplay(LineBuf** lf, Page* page)
    return 1;
 }
 
-
-
 //提取名字
 int deal_author(LineBuf** lf, Page* page)
 {
@@ -283,14 +290,14 @@ int deal_content(LineBuf** lf, Page* page )
    LablePosPair* lpp = (LablePosPair*)malloc(sizeof(LablePosPair));
    lpp->next = NULL;
    LablePosPair* p = lpp;
-  
+   printf("begin check out content lable:\n\n\n\n\n\n\n"); 
    find_all_greater_lower(page->content, p);
-
-   test_lpp(lpp);
+  // out_content_scope(page->content, p); 
+  // test_lpp(lpp);
    //把除去标签的部分都赋值给内容项
-//   dispos_son_lable(page->content, lpp);   
-   out_content_scope(LablePosPair* lpp);
-   test_lable(page->content, p);
+   dispos_son_lable(page->content, lpp);   
+   //copy_scope_str_to_str(page->content, lpp);
+//   test_lable(page->content, p);
 
    endlf = endlf->next;
    page->content_filled = 1;

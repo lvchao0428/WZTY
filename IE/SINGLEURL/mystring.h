@@ -3,7 +3,7 @@
 
 #include<stdio.h>
 #include<string.h>
-
+#include"def.h"
 
 int mystrstr(char* father, char* son);			//测试前面字符串里面是否包含后面的字符串
 
@@ -23,6 +23,7 @@ int return_son_str_pos(char* father, char* son);	//返回第一次出现son字�
 int print_str(char* str, int beg, int end);		//打印beg到end里面的字符串
 
 
+int despace_betw_more_less(char* str);		//去掉大于号小于号之间的空格
 
 
 #endif

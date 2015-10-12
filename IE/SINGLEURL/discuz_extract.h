@@ -1,6 +1,7 @@
 #ifndef _DISCUZ_EXTRACT_H_
 #define _DISCUZ_EXTRACT_H_
 
+#include"def.h"
 
 
 int discuz_fill_the_page(LineBuf* pb, Page* page);		//把行结构信息提取出需要的所有需要信息

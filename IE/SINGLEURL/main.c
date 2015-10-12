@@ -7,6 +7,12 @@
 
 #include<stdio.h>
 #include"page.h"
+#include"discuz_extract.h"
+#include"nodiscuz_extract.h"
+#include"def.h"
+#include"myfiledeal.h"
+#include<stdlib.h>
+#include"test.h"
 
 #define TITLE_LEN 50
 

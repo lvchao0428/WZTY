@@ -5,11 +5,21 @@
     > Created Time: Mon Oct 12 14:25:43 2015
  ************************************************************************/
 
-#include<stdio.h>
+#include"def.h"
 
+void test_fillbuf(LineBuf* lb)
+{
+   LineBuf* p = lb->next;
+
+   while(p)
+   {
+	  printf("%s\n", lb->str);
+	  p = p->next;
+   }
+}
 
 void test_lable(char* line, LablePosPair* lpp)
-{
+{//不能对此直接测试
    int i = 0;
    LablePosPair* p = lpp->next;
    while(p != NULL)
