@@ -37,18 +37,28 @@ int main(int argc, char* argv[])
    if(is_discuz(lb) == 1)
    {
 	  discuz_fill_the_page(lb, &page);
+	  
    }
    else//非discuz网站
    {
-	  
+	  no_discuz_fill_the_page(lb, &page);
    }
 
-   printf("title:%s\n", page.title);
-   printf("content:%s\n", page.content);
-   printf("author:%s\n", page.author);
-   printf("click num:%s\n", page.click_count);
-   printf("replay num:%s\n", page.replay_count);
-   printf("time:%s\n", page.time);
+   if(is_discuz(lb) == 1)
+   {
+	  printf("title:%s\n", page.title);
+	  printf("content:%s\n", page.content);
+	  printf("author:%s\n", page.author);
+	  printf("click num:%s\n", page.click_count);
+	  printf("replay num:%s\n", page.replay_count);
+	  printf("time:%s\n", page.time);
+   }
+   else
+   {
+	  printf("title:%s\n", page.title);
+	  printf("content:%s\n", page.content);
+   }
+  
    //   test_line_buf(lb);
 //   free_page(&page);
    return 0;

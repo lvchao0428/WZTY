@@ -50,11 +50,8 @@ int mystrcpy(char* dest, char* from, int begPos, int endPos)
    }
    dest[j] = '\0';
 }
-/*
-int find_comma_num_out(char* line)
+int find_comma_num_out(char* line, LablePosPair* lpp)
 {//找到字符串里面目标符号的数量
-   int begPos, endPos;
-   int i = 0;
    
    char comma[3][5] = {
 	  {","},
@@ -62,15 +59,12 @@ int find_comma_num_out(char* line)
 	  {"。"},
    };
    int comma_num = 0;
-   LablePosPair* lpp = (LablePosPair*)malloc(sizeof(LablePosPair));
-   find_all_greater_lower(line, lpp);
-   LablePosPair* p1, *p2;
-   p1 = p2 = lpp->next;
+   LablePosPair* p;
+   p = lpp->next;
    
-   while(p2 != NULL)
+   while(p != NULL)
    {
 	  int j = 0;
-	  //p1 = 
 	  while(j < 3)
 	  {
 		 comma_num += find_str_with_scope(line, comma[j], p->left, p->right);
@@ -81,7 +75,34 @@ int find_comma_num_out(char* line)
    
    return comma_num;
 }
-*/
+
+int is_word_longer_than_lable(char* line)
+{
+   int wordTotalLen = 0;
+   int lableTotalLen = 0;
+
+   LablePosPair* wordPairVector = (LablePosPair*)malloc(sizeof(LablePosPair));
+   LablePosPair* lablePairVector = (LablePosPair*)malloc(sizeof(LablePosPair));
+
+   find_all_greater_lower(line, lablePairVector);
+   out_content_scope(line, wordPairVector);
+
+   LablePosPair* p = wordPairVector->next;
+
+   while(p)
+   {//求出单词的总长度
+	  wordTotalLen += (p->right - p->left);
+	  p = p->next;
+   }
+   p = lablePairVector->next;
+   while(p)
+   {//求出标签的总长度
+	  lableTotalLen += (p->right - p->left);
+	  p = p->next;
+   }	
+   printf("wordlen:%d    lablelen:%d\n", wordTotalLen, lableTotalLen);
+   return (wordTotalLen >= lableTotalLen);
+}
 
 int find_str_with_scope(char* str, char* word, int begPos, int endPos)
 {//返回str里面，在begPos和endPos下标范围内，包含word的个数

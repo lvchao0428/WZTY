@@ -6,6 +6,9 @@
  ************************************************************************/
 
 #include"def.h"
+#include"mystring.h"
+#include"test.h"
+
 
 void test_fillbuf(LineBuf* lb)
 {
@@ -24,12 +27,9 @@ void test_lable(char* line, LablePosPair* lpp)
    LablePosPair* p = lpp->next;
    while(p != NULL)
    {
-	  i = p->left;
-	  while(i < p->right)
-	  {
-		 printf("%c", line[i]);
-		 i++;
-	  }
+	  printf("%c%c", line[p->left], line[p->right-1]);
+	  
+	  
 	  p = p->next;
 
    }
@@ -45,4 +45,13 @@ void test_lpp(LablePosPair* lpp)
 	  p = p->next;
    }
 }
+/*
+int main(int argc, char* argv[])
+{
+   int c = find_str_with_scope(argv[1], argv[2], 3, 10);
+   
+   printf("comma_num:%d\n", c);
 
+   return 0;
+}
+*/

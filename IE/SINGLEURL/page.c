@@ -19,7 +19,7 @@ int is_discuz(LineBuf* pb)
 	  strcat(temphead, beglb->str);
 	  beglb = beglb->next;
    }
-   printf("head:%s\n", temphead);
+//   printf("head:%s\n", temphead);
    if((mystrstr(temphead, "Discuz") == 1) || (mystrstr(temphead, "discuz") == 1))
    {
 	  return 1;

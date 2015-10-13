@@ -10,7 +10,7 @@
 #include<fcntl.h>
 #include<string.h>
 #include<errno.h>
-
+#include<math.h>
 
 
 #define BUFSIZE 1024
@@ -44,10 +44,7 @@ typedef struct LineBuf
 {
    char* str;
    struct LineBuf* next;
-
-   //存储每行逗号的数量
-   int comma_num;
-   int line_num;
+   
 }LineBuf, *pLineBuf;
 
 typedef struct buf_queue
@@ -59,23 +56,10 @@ typedef struct buf_queue
 
 typedef struct LableElem
 {
-   char key[30];
-   char value[30];
+   char val[30];
    struct LableElem* next;
-   struct LableElem* tail;
 }LableElem, *pLableElem;
 
-
-typedef struct Lable
-{
-   char name[60];
-   struct Lable* next;
-   struct Lable* tail;
-   LableElem* le;
-   char* content;		//如果为嵌套的外层标签，则此内容为空，如果为最内层标签，
-   //则填充文字数值
-
-}Lable, *pLable;
 
 //存储大于号和小于号的位置，定位内容项里面的子标签
 typedef struct LablePosPair

@@ -37,14 +37,14 @@ int discuz_fill_the_page(LineBuf* pb, Page* page)
 			   deal_title(&p, page);
 			}
 
-			printf("title type ,%s\n", line);
+		//	printf("title type ,%s\n", line);
 			break;
 		 case CONTENTLABLE:
 			if(page->content_filled != 1)
 			{//如果可能是内容选项，而且还没有被填充过，则当内容项处理时候的内容
 			   deal_content(&p, page);
 			}
-			printf("content type ,%s\n", line);
+			//printf("content type ,%s\n", line);
 			break;
 		 case AUTHORLABLE:
 			if(page->author_filled != 1)
@@ -79,17 +79,17 @@ int deal_time(LineBuf** lf, Page* page)
    LineBuf* endlf = templf;
    char* line = endlf->str;
    
-   printf("str: %s\n", endlf->str); 
+  // printf("str: %s\n", endlf->str); 
    int begPos = 0, endPos = 0;
    //find begPos
    while(line[begPos] != '\0' && line[begPos++] != '>');
    endPos = begPos;
    
-   printf("time begin: %d\n", begPos);
+  // printf("time begin: %d\n", begPos);
    //find endPos
    while(line[endPos] != '\0' && line[endPos] != '<') endPos++;
    
-   printf("time end: %d\n", endPos);
+  // printf("time end: %d\n", endPos);
    page->time = (char*)malloc(sizeof(char)*(endPos-begPos+1));
    mystrcpy(page->time, line, begPos, endPos);
    page->time_filled = 1;
@@ -127,12 +127,12 @@ int deal_clickAndreplay(LineBuf** lf, Page* page)
    
    //printf("begin despace\n");
    //despace_betw_more_less(tempstr);
-   printf("after despace str:%s\n", tempstr);
+   //printf("after despace str:%s\n", tempstr);
    //find the first place after "查看" 's '><'
    int clickbegPos = 0, clickendPos = 0;
    int replaybegPos = 0, replayendPos = 0;
    clickbegPos = return_son_str_pos(tempstr, "查看");
-   printf("return son pos:%d\n", clickbegPos);
+   //printf("return son pos:%d\n", clickbegPos);
    //find clickbegPos
    while(tempstr[clickbegPos] != '\0')
    {
@@ -153,21 +153,21 @@ int deal_clickAndreplay(LineBuf** lf, Page* page)
 	  }
 	  clickbegPos++;
    }
-   printf("begin pos:%d\n", clickbegPos);
+ //  printf("begin pos:%d\n", clickbegPos);
    //print_str(tempstr, clickbegPos, clickendPos+5);
 
    //find clickendPos
    clickendPos = clickbegPos;
    while(tempstr[clickendPos] != '\0')
    {
-	  printf("bb pos:%d\n", clickendPos);
+//  printf("bb pos:%d\n", clickendPos);
 	  if(tempstr[clickendPos] == '<')
 	  {
 		 break;
 	  }
 	  clickendPos++;
    }
-   printf("clickend pos:%d\n", clickendPos);
+//   printf("clickend pos:%d\n", clickendPos);
    //find replaybegPos
    page->click_count = (char*)malloc(sizeof(char)*20);
    mystrcpy(page->click_count, tempstr, clickbegPos, clickendPos);
@@ -197,7 +197,7 @@ int deal_clickAndreplay(LineBuf** lf, Page* page)
 	  }
 	  replaybegPos++;
    }
-   printf("replay beg:%d\n", replaybegPos);
+ //  printf("replay beg:%d\n", replaybegPos);
    //find replay end 
    replayendPos = replaybegPos;
    while(tempstr[replayendPos] != '\0')
@@ -211,7 +211,7 @@ int deal_clickAndreplay(LineBuf** lf, Page* page)
 		 replayendPos++;
 	  }
    }
-   printf("replay end pos:%d\n", replayendPos);
+ //  printf("replay end pos:%d\n", replayendPos);
    page->replay_count = (char*)malloc(sizeof(char)*10);
    mystrcpy(page->replay_count, tempstr, replaybegPos, replayendPos);
    page->replay_filled = 1;
@@ -271,7 +271,7 @@ int deal_content(LineBuf** lf, Page* page )
 	  return 0;
    }
 
-   printf("tempcontentline: %s\n", tempstr);
+ //  printf("tempcontentline: %s\n", tempstr);
 
    //把table闭合标签里面的内容存起来再分析
     //内容提取的要素是，table标签里面的内容，有嵌套标签包含的都去掉
@@ -287,17 +287,28 @@ int deal_content(LineBuf** lf, Page* page )
    mystrcpy(page->content, tempstr, begPos, endPos);
 
    //把嵌套子标签去掉
-   LablePosPair* lpp = (LablePosPair*)malloc(sizeof(LablePosPair));
-   lpp->next = NULL;
-   LablePosPair* p = lpp;
+   LablePosPair* greaterLpp = (LablePosPair*)malloc(sizeof(LablePosPair));
+   LablePosPair* wordLpp = (LablePosPair*)malloc(sizeof(LablePosPair));
    printf("begin check out content lable:\n\n\n\n\n\n\n"); 
-   find_all_greater_lower(page->content, p);
-  // out_content_scope(page->content, p); 
-  // test_lpp(lpp);
+   //printf("content raw:\n%s\n", page->content);
+   find_all_greater_lower(page->content, greaterLpp);
+   out_content_scope(page->content, wordLpp); 
+   
+   test_lpp(greaterLpp);
+
+   test_lpp(wordLpp);
+
+   if(is_word_longer_than_lable(page->content) == 1)
+   {
+
+   }
+   int comma_num = find_comma_num_out(page->content, wordLpp);
+
+   printf("comma_num:%d\n", comma_num);
    //把除去标签的部分都赋值给内容项
-   dispos_son_lable(page->content, lpp);   
+   dispos_son_lable(page->content, greaterLpp);   
+   //
    //copy_scope_str_to_str(page->content, lpp);
-//   test_lable(page->content, p);
 
    endlf = endlf->next;
    page->content_filled = 1;
@@ -314,7 +325,7 @@ int deal_title(LineBuf** lf, Page* page)
    LineBuf* templf = *lf;
    char* line = (*lf)->str;
    char temptitle[300];
-   printf("%s\n", line);
+ //  printf("%s\n", line);
    int begPos = 0, endPos = 0;
 
    //find begPos
@@ -322,8 +333,8 @@ int deal_title(LineBuf** lf, Page* page)
    //find endPos
    endPos = begPos;
    while(line[endPos] != '\0' && line[endPos] != '<') endPos++;
-   printf("begpos: %d\n", begPos);
-   printf("endpos: %d\n", endPos);
+//   printf("begpos: %d\n", begPos);
+//   printf("endpos: %d\n", endPos);
 
    page->title = (char*)malloc(sizeof(char)*(endPos-begPos+1));
    mystrcpy(page->title, line, begPos, endPos);

@@ -9,9 +9,12 @@ int mystrstr(char* father, char* son);			//测试前面字符串里面是否包�
 
 int mystrcpy(char* dest, char* from, int begPos, int endPos);	//把from字符串的下表范围里面的字符串拷贝到前面字符串
 
-int find_comma_num_out(char* line);		//寻找括号外面逗号的数量
+int find_comma_num_out(char* line, LablePosPair* lpp);		//寻找括号外面逗号的数量
+
+int is_word_longer_than_lable(char* line);	//判断line里面的内容和标签那个更长，内容长返回1，否则返回0
 
 int find_str_with_scope(char* line, char* son, int begPos, int endPos);	//寻找范围内的字符串数量
+
 
 
 int mycatNoN(char* dest, char* from);			//把后面的字符串拼接到前面字符串，忽略换行符

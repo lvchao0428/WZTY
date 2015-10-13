@@ -1,7 +1,8 @@
+CFLAGE+= -g
 OBJECT = main.o page.o test.o mystring.o myfiledeal.o lable_deal.o \
    clean_res.o discuz_extract.o nodiscuz_extract.o 
 main:$(OBJECT)
-	gcc -o main $(OBJECT)
+	gcc -g -o main $(OBJECT)
 $(OBJECT):def.h
 page.o main.o:page.h
 main.o test.o:test.h
