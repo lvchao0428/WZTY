@@ -20,7 +20,8 @@ int main(int argc, char* argv[])
 {
    //test read file
    
-   
+   test_lable_stack();
+  /* 
    if(argc != 2)
    {
 	  perror("two argv needed !\n");
@@ -61,5 +62,7 @@ int main(int argc, char* argv[])
   
    //   test_line_buf(lb);
 //   free_page(&page);
+   
+*/
    return 0;
 }

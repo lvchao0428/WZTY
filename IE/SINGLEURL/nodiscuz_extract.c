@@ -58,41 +58,25 @@ void deal_normal_content(LineBuf** lb, Page* page)
    int line_num = 0;
 
    int comma_num = 0;
- /*  
+   
    while(endlf != NULL && line_num < 5)
    {
 	  strcat(tempstr, endlf->str);
 	  endlf = endlf->next;
 	  line_num++;	  
    }
-   printf("----------------------\n%s\n", tempstr);
-   printf("-------------------------");
+   //如果符合条件，则一直搜索到标签的结尾，然后抽取所有的内容
    if(find_comma_num_out(tempstr) > 5 && is_word_longer_than_lable(tempstr) == 1)
    {
-	  //printf("%s\n", tempstr);
-//	  page->content  = (char*)malloc(strlen(tempstr) + 1);
-//	  strcpy(page->content, tempstr);
+	  analysis_content_lable(lb, tempstr);
+	  //tempstr 存储处理好的内容
 	  page->content_filled = 1;
-	  printf("got content\n");
    }
-*/
+   else
+   {
+	  *lb = beglf->next;
+   }
 
-   while(endlf != NULL && mystrstr(endlf->str, "</table>") != 1)
-   {
-	  strcat(tempstr, endlf->str);
-	  endlf = endlf->next;
-   }
-  /* 
-   if(find_comma_num_out(tempstr) > 5)
-   {
-	  printf("is more 5\n");
-
-   }
-   if(is_word_longer_than_lable(tempstr) == 1)
-   {
-	  printf("is more words\n");
-   }
-   */
 }
 
 LableType check_normal_lable(char* line)
@@ -103,21 +87,13 @@ LableType check_normal_lable(char* line)
    if(mystrstr(line, "<title>") == 1)
    {
 	  lt = TITLELABLE;
-//	  printf("title check:%s\n", line);
    }
 
-  /*
    if(mystrstr(line, "<div") == 1 || mystrstr(line, "<table") == 1)
    {
 	  lt = CONTENTLABLE;
-//	  printf("content check:%s\n", line);
    }
-*/
-   //test content
-   if(mystrstr(line, "postmessage") == 1)
-   {
-	  lt = CONTENTLABLE;
-   }
+   
    return lt;
 }
 

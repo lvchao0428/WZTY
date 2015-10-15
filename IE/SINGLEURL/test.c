@@ -8,7 +8,7 @@
 #include"def.h"
 #include"mystring.h"
 #include"test.h"
-
+#include"lable_deal.h"
 
 void test_fillbuf(LineBuf* lb)
 {
@@ -45,6 +45,39 @@ void test_lpp(LablePosPair* lpp)
 	  p = p->next;
    }
 }
+
+void test_lable_stack()
+{
+   LableElem* head = (LableElem*)malloc(sizeof(LableElem));
+   head->next = NULL;
+   int i = 0;
+   //push3 elem
+   push_lable(head, "china");
+   push_lable(head, "japan");
+   push_lable(head, "american");
+   //output 3 elem
+   LableElem* p = top_lable(head);
+   printf("1:%s\n", p->val);
+   p = top_lable(head);
+   pop_lable(head);
+   
+   p = top_lable(head);
+   printf("2:%s\n", p->val);
+   pop_lable(head);
+
+   p = top_lable(head);
+   printf("3:%s\n", p->val);
+   pop_lable(head);
+   pop_lable(head);
+   if(head->next == NULL)
+   {
+	  printf("NULL...\n");
+   }
+
+
+   
+}
+
 /*
 int main(int argc, char* argv[])
 {

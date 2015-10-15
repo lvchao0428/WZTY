@@ -183,6 +183,65 @@ void copy_scope_str_to_str(char* str, LablePosPair* lpp)
    str[j] = '\0';
 }
 
+int analysis_content_lable(LineBuf** lb, char* line)
+{//分析content的标签
+   LableElem* head = (LableElem*)malloc(sizeof(LableElem));
+   head->next = NULL;
+
+   LablePosPair* lpp = (LablePosPair*)malloc(sizeof(LablePosPair));
+   lpp->next = NULL;
+   
+   int i = 0;
+   find_all_greater_lower(line, lpp);
+   LablePosPair* tpp = lpp->next;
+   
+   //找到第一个开始标签
+   while(tpp && line[tpp->left+1] == '/')
+   {
+	  tpp = tpp->next;
+   }
+
+   char temp[20];
+   int j = 0;
+   i = tpp->left;
+   while(tpp && i <= tpp->right && line[i] != ' ')
+   {
+	  temp[j++] = line[i++];	  
+   }
+   temp[j] = '\0';
+   push_lable(head, temp);
+
+   tpp = tpp->next;
+   //解析剩余标签，初始传入的部分标签先解析出来
+   while(line[i] && tpp)
+   {
+	  j = 0;
+	  if(line[tpp->left+1] == '/')
+	  {
+		 pop_lable(head);
+	  }
+	  else
+	  {
+		 i = tpp->left;
+		 while(i <= tpp->right && line[i] != ' ')
+		 {
+	  		i++;
+			temp[j++] = line[i];
+		 }
+		 temp[j] = '\0';
+		 push_lable(head, temp);
+	  }
+	  
+   }
+   char tempstr[100000];
+   LineBuf* lbp = *lb;
+   //recv tempstr until tpp is NULL
+   while(tpp)
+   {
+	  //
+   }
+}
+
 LableElem* push_lable(LableElem* le, char* val)
 {
    LableElem* p = (LableElem*)malloc(sizeof(LableElem));
@@ -202,31 +261,43 @@ LableElem* push_lable(LableElem* le, char* val)
    return le;
 }
 
-char* top_lable(LableElem* le)
+LableElem* top_lable(LableElem* le)
 {
    if(le->next == NULL)
    {
-	  return '\0';
+	  return NULL;
    }
    else
    {
-	  return le->next->val;
+	  return le->next;
    }
 }
 
-LableElem* pop_lable(LableElem* le)
+void pop_lable(LableElem* le)
 {
    if(le->next == NULL)
    {
-	  return le;
+	  return;
    }
    else
    {
+
 	  LableElem* p = le->next;
-	  le->next = le->next->next;
+		 le->next = le->next->next;
 	  free(p);
    }
-   return le;
 }
 
+int get_elem_stack_size(LableElem* head)
+{
+   LableElem* p = head->next;
 
+   int size = 0;
+   while(p)
+   {
+	  p = p->next;
+	  size++;
+   }
+
+   return size;
+}

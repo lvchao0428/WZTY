@@ -17,10 +17,10 @@ int analysis_content_lable(char* line, LableElem* le);		//分析content line里�
 
 LableElem* push_lable(LableElem* le, char* val);		//push lable
 
-char* top_lable(LableElem* le);		//top lable
+LableElem* top_lable(LableElem* le);		//top lable
 
-LableElem* pop_lable(LableElem* le);		//pop lable
+void pop_lable(LableElem* le);		//pop lable
 
-
+int get_elem_stack_size(LableElem* head);
 
 #endif

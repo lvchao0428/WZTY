@@ -22,6 +22,9 @@ typedef int LableType;
 #define CLICKNUMLABLE	3
 #define REPLAYLABLE		4
 #define CONTENTLABLE	5
+#define BEGINLABLE		6
+#define ENDLABLE		7
+
 
 typedef struct Page
 {
@@ -56,6 +59,7 @@ typedef struct buf_queue
 
 typedef struct LableElem
 {
+   LableType lt;		//存储是开始标签还是结束标签
    char val[30];
    struct LableElem* next;
 }LableElem, *pLableElem;
