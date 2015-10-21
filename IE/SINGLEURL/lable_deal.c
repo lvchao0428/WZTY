@@ -105,7 +105,6 @@ LableType check_lable(char* line)
    return lt;
 }
 
-
 void find_all_greater_lower(char* line, LablePosPair* lpp)
 {//找到所有的大于号和小于号的位置
    int i = 0;
@@ -138,12 +137,11 @@ void find_all_greater_lower(char* line, LablePosPair* lpp)
    }
 }
 
-
 void dispos_son_lable(char* str, LablePosPair* lpp)
 {
    LablePosPair* p = lpp->next;
    int i = 0, j = 0;
-   while(str[i] != '\0')
+   while(str[i] != '\0' && p)
    {
 	  if(p != NULL)
 	  {
@@ -157,7 +155,7 @@ void dispos_son_lable(char* str, LablePosPair* lpp)
 			str[j++] = str[i++];
 		 }
 	  }
-	  while(str[i] != '\0' && i < p->left) 
+	  while(p && str[i] != '\0' && i < p->left) 
 	  {
 		 str[j++] = str[i++]; 
 	  }
@@ -183,6 +181,116 @@ void copy_scope_str_to_str(char* str, LablePosPair* lpp)
    str[j] = '\0';
 }
 
+
+int content_until_lable_end_extract(LineBuf* lb, char* line)
+{
+   LineBuf* templf = lb;
+   LineBuf* endlf = templf;
+
+   int count = 5;
+   int is_end = 0;
+   //往回回溯5行，如果有结束标签则内容全面
+   //否则向后找到结束标签为止
+   while(count-- > 0)
+   {
+	  if(mystrstr(endlf->str, "</div>"))
+	  {
+		 is_end = 1;
+		 break;	 
+	  }
+	  else
+	  {
+		 endlf = endlf->before;	 
+	  }
+   }
+
+   if(is_end == 1)
+   {
+	  return 1;
+   }
+   else
+   {
+	  //向后追溯结束标签
+	  while(templf)
+	  {
+		 if(!mystrstr(templf->str, "</div>"))
+		 {
+			strcat(line, templf->str); 
+			templf = templf->next;
+		 }
+		 else
+		 {
+			strcat(line, templf->str);
+			return 1;
+		 }
+	  }
+
+   }
+
+}
+
+int extract_content_with_punct(LineBuf** lb, char* line)
+{
+   LablePosPair* lpp = (LablePosPair*)malloc(sizeof(LablePosPair));
+   lpp->next = NULL;
+
+   //获取内容的范围列表,初始五行
+   //out_content_scope(line, lpp);
+   //char tempstr[100000];		//存储所有的粗糙内容部分
+   //strcpy(tempstr, line);
+   LineBuf* templf = *lb;
+   //步长为3如果三行里面的符号数量小于5个，就视为内容的最后一个节点
+   int step = 0;
+   while(templf)
+   {
+	  step = 0;
+	  char temptempstr[100000];
+	  while(templf && step != 5)
+	  {
+		 strcat(temptempstr, templf->str);
+		 templf = templf->next;
+		 step++;
+	  }
+	  //templf = templf->next;
+	  LablePosPair* templpp = (LablePosPair*)malloc(sizeof(LablePosPair));
+	  templpp->next = NULL;
+	  out_content_scope(temptempstr, templpp);	//找到最近三行的所有标签和标点数量
+	  int comma_num = find_comma_num_out(temptempstr);
+	  free_LablePosPair(templpp);
+	  if(comma_num >= 5)
+	  {
+		 printf("comma num:%d\n", comma_num);
+		 strcat(line, temptempstr);
+		 printf("temptempstr:%s\n", temptempstr);
+		 
+	  }
+	  else if(comma_num < 5)
+	  {
+		 //如果标点符号处于低谷值，那么作为结束的三行内容初始行。开始提取内容
+		 //否则继续往后面继续寻找
+		 //deal content
+		 printf("comma num:%d\n", comma_num);
+		 strcat(line, temptempstr);
+		 printf("temptempstr:%s\n", temptempstr);
+		 
+		 LablePosPair* puctLpp = (LablePosPair*)malloc(sizeof(LablePosPair));
+		 puctLpp->next = NULL;
+		 
+		 find_all_greater_lower(line, puctLpp);
+		 dispos_son_lable(line, puctLpp);
+		 printf("over check\n--------------------------------\n%s\n", line);
+		 break;
+	  }
+
+	  if(templf != NULL)
+	  {
+		 templf = templf->next;
+	  }
+
+   }
+  *lb = templf;
+}
+/*
 int analysis_content_lable(LineBuf** lb, char* line)
 {//分析content的标签
    LableElem* head = (LableElem*)malloc(sizeof(LableElem));
@@ -190,9 +298,9 @@ int analysis_content_lable(LineBuf** lb, char* line)
 
    LablePosPair* lpp = (LablePosPair*)malloc(sizeof(LablePosPair));
    lpp->next = NULL;
-   
+    
    int i = 0;
-   find_all_greater_lower(line, lpp);
+  // find_all_greater_lower(line, lpp);
    LablePosPair* tpp = lpp->next;
    
    //找到第一个开始标签
@@ -233,6 +341,9 @@ int analysis_content_lable(LineBuf** lb, char* line)
 	  }
 	  
    }
+
+   //每次读取五行直到标点符号的密度小于每行三个，（界定规则之后详细探讨）
+
    char tempstr[100000];
    LineBuf* lbp = *lb;
    //recv tempstr until tpp is NULL
@@ -241,7 +352,7 @@ int analysis_content_lable(LineBuf** lb, char* line)
 	  //
    }
 }
-
+*/
 LableElem* push_lable(LableElem* le, char* val)
 {
    LableElem* p = (LableElem*)malloc(sizeof(LableElem));
@@ -300,4 +411,57 @@ int get_elem_stack_size(LableElem* head)
    }
 
    return size;
+}
+
+
+void deal_anno(LineBuf** lb)		//跳过注释区域
+{
+   LineBuf* templf = *lb;
+
+   if(mystrstr(templf->str, "<!--") == 1)
+   {
+	  while(templf && mystrstr(templf->str, "-->") != 1)
+	  {
+		 templf = templf->next;
+	  }
+   }
+   else
+   {
+	  return;
+   }
+   *lb = templf;
+}
+
+
+void deal_script(LineBuf** lb)		//跳过javascript代码
+{
+   LineBuf* templf = *lb;
+
+   if(mystrstr(templf->str, "<script") ||
+		 mystrstr(templf->str, "<SCRIPT>"))
+   {
+	  while(mystrstr(templf->str, "</SCRIPT>") ||
+			mystrstr(templf->str, "</script>"))
+	  {
+		 templf = templf->next;
+	  }
+   }
+   else
+   {
+	  return;
+
+   }
+
+   *lb = templf;
+}
+
+void free_LablePosPair(LablePosPair* lpp)
+{
+   LablePosPair* templpp = lpp;
+   while(templpp)
+   {
+	  LablePosPair* q = templpp;
+	  templpp = templpp->next;
+	  free(q);
+   }
 }

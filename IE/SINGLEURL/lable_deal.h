@@ -13,6 +13,10 @@ void dispos_son_lable(char* str, LablePosPair* lpp);	//去掉子标签
 
 void copy_scope_str_to_str(char* str, LablePosPair* lpp);	//把lpp内存储范围内的字符串，赋值给原来的字符串
 
+int content_until_lable_end_extract(LineBuf* lb, char* line);	//提取内容的方法2
+
+int extract_content_with_punct(LineBuf** lb, char* line);	//使用标点符号密度定位内容部分
+
 int analysis_content_lable(char* line, LableElem* le);		//分析content line里面的标签
 
 LableElem* push_lable(LableElem* le, char* val);		//push lable
@@ -22,5 +26,11 @@ LableElem* top_lable(LableElem* le);		//top lable
 void pop_lable(LableElem* le);		//pop lable
 
 int get_elem_stack_size(LableElem* head);
+
+void deal_anno(LineBuf** lb);		//跳过注释区域
+
+void deal_script(LineBuf** lb);		//跳过javascript代码
+
+void free_LablePosPair(LablePosPair* lpp);
 
 #endif

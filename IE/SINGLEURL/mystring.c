@@ -50,7 +50,7 @@ int mystrcpy(char* dest, char* from, int begPos, int endPos)
    }
    dest[j] = '\0';
 }
-int find_comma_num_out(char* line, LablePosPair* lpp)
+int find_comma_num_out(char* line)		//找到里面内容部分的标点数量
 {//找到字符串里面目标符号的数量
    
    char comma[3][5] = {
@@ -59,10 +59,12 @@ int find_comma_num_out(char* line, LablePosPair* lpp)
 	  {"。"},
    };
    int comma_num = 0;
-   LablePosPair* p;
-   p = lpp->next;
-   
-   while(p != NULL)
+   LablePosPair* wordPair = (LablePosPair*)malloc(sizeof(LablePosPair));
+   wordPair->next = NULL;
+   out_content_scope(line, wordPair);
+   LablePosPair* p = wordPair->next;
+
+   while(p)
    {
 	  int j = 0;
 	  while(j < 3)
@@ -75,6 +77,46 @@ int find_comma_num_out(char* line, LablePosPair* lpp)
    
    return comma_num;
 }
+
+
+int word_length_get(char* line)		//获得字符串里面的内容长度
+{
+   LablePosPair* wordLpp = (LablePosPair*)malloc(sizeof(LablePosPair));
+   wordLpp->next = NULL;
+
+   out_content_scope(line, wordLpp);
+
+   int wordlenSum = 0;
+   LablePosPair* p = wordLpp->next;
+   while(p)
+   {
+	  wordlenSum += (p->right - p->left);
+	  p = p->next;
+   }
+   return wordlenSum;
+}
+
+
+int lable_length_get(char* line)	//获得字符串里面的标签长度
+{
+   LablePosPair* lableLpp = (LablePosPair*)malloc(sizeof(LablePosPair));
+   lableLpp->next = NULL;
+
+   find_all_greater_lower(line, lableLpp);
+
+   int lablelenSum = 0;
+   LablePosPair* p = lableLpp->next;
+
+   while(p)
+   {
+	  lablelenSum += (p->right - p->left);
+	  p = p->next;
+   }
+
+   return lablelenSum;
+}
+
+
 
 int is_word_longer_than_lable(char* line)
 {

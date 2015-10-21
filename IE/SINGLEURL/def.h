@@ -24,7 +24,7 @@ typedef int LableType;
 #define CONTENTLABLE	5
 #define BEGINLABLE		6
 #define ENDLABLE		7
-
+#define NONLABLE		-1
 
 typedef struct Page
 {
@@ -47,7 +47,7 @@ typedef struct LineBuf
 {
    char* str;
    struct LineBuf* next;
-   
+   struct LineBuf* before;  
 }LineBuf, *pLineBuf;
 
 typedef struct buf_queue

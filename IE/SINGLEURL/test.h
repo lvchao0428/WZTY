@@ -11,4 +11,6 @@ void test_lable(char* line, LablePosPair* lpp);		//测试lable位置结构体数
 
 void test_lpp(LablePosPair* lpp);		//测试posPair
 
+void count_comma(LineBuf* lb);
+
 #endif

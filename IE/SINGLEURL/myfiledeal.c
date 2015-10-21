@@ -21,7 +21,7 @@ int fill_buf(char* filename, LineBuf* lb)
 	  perror("read file error.");
 	  return -1;
    }
-   LineBuf* p = lb->next;
+   LineBuf* p = lb;
    int no =0;
    //getline len的参数为当前line的最大长度
    while((read_n = getline(&line, &len, fp)) != -1)
@@ -34,18 +34,20 @@ int fill_buf(char* filename, LineBuf* lb)
 	  LineBuf* q = (LineBuf*)malloc(sizeof(LineBuf));
 	  //	  printf("len:%d, %s\n", strlen(line), line);
 	  q->str = (char*)malloc(sizeof(char)*(strlen(line)+1));
-
+	  
 	  q->next = NULL;
 	  strcpy(q->str, line);
-
+	  
 	  if(lb->next == NULL)
 	  {
 		 lb->next = q;
+		 q->before = lb;
 		 p = q;
 	  }
 	  else
 	  {
 		 p->next = q;
+		 q->before = p;
 		 p = p->next;
 	  }
 

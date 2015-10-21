@@ -294,15 +294,15 @@ int deal_content(LineBuf** lf, Page* page )
    find_all_greater_lower(page->content, greaterLpp);
    out_content_scope(page->content, wordLpp); 
    
-   test_lpp(greaterLpp);
+  // test_lpp(greaterLpp);
 
-   test_lpp(wordLpp);
+  // test_lpp(wordLpp);
 
    if(is_word_longer_than_lable(page->content) == 1)
    {
 
    }
-   int comma_num = find_comma_num_out(page->content, wordLpp);
+   int comma_num = find_comma_num_out(page->content);
 
    printf("comma_num:%d\n", comma_num);
    //把除去标签的部分都赋值给内容项

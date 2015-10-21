@@ -20,8 +20,7 @@ int main(int argc, char* argv[])
 {
    //test read file
    
-   test_lable_stack();
-  /* 
+//   test_lable_stack();
    if(argc != 2)
    {
 	  perror("two argv needed !\n");
@@ -35,16 +34,17 @@ int main(int argc, char* argv[])
 
    fill_buf(argv[1], lb);
    
-   if(is_discuz(lb) == 1)
+/*   if(is_discuz(lb) == 1)
    {
 	  discuz_fill_the_page(lb, &page);
 	  
    }
    else//非discuz网站
    {
-	  no_discuz_fill_the_page(lb, &page);
    }
-
+*/
+	  no_discuz_fill_the_page(lb, &page);
+  /*
    if(is_discuz(lb) == 1)
    {
 	  printf("title:%s\n", page.title);
@@ -54,15 +54,15 @@ int main(int argc, char* argv[])
 	  printf("replay num:%s\n", page.replay_count);
 	  printf("time:%s\n", page.time);
    }
-   else
-   {
+   */
+ //  else
+ //  {
 	  printf("title:%s\n", page.title);
 	  printf("content:%s\n", page.content);
-   }
+//   }
   
    //   test_line_buf(lb);
 //   free_page(&page);
    
-*/
    return 0;
 }
