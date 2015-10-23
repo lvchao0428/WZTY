@@ -16,6 +16,51 @@
 
 #define TITLE_LEN 50
 
+/*
+void test_lable_fun(LineBuf* lb)
+{
+   if(!lb || strlen(lb->str) < 5)
+   {
+	  return;
+   }
+   LablePosPair* lpp = (LablePosPair*)malloc(sizeof(LablePosPair));
+   lpp->next = NULL;
+   printf("lineno:%d\tstrlen:%d\n", lb->line_no, strlen(lb->str));
+  // find_all_greater_lower(lb->str, lpp);
+   LablePosPair* wordLpp = (LablePosPair*)malloc(sizeof(LablePosPair));
+   wordLpp->next = NULL;
+   out_content_scope(lb->str, wordLpp);
+   LablePosPair* q = wordLpp->next;
+   //test greater & lower is embrace all 
+
+   
+
+   LablePosPair* p = lpp->next;
+   while(p)
+   {
+	  printf("lable left:%d %c\tright:%d %c\n", p->left, (lb->str[p->left]), p->right, (lb->str[p->right]));
+	  p = p->next;
+   }
+
+   while(q)
+   {
+	  printf("word left:%d \tright:%d\n", q->left, q->right);
+	  q = q->next;
+   }
+
+
+}
+*/
+void test_annotate(LineBuf* lb)
+{
+   LineBuf* templb = lb->next;
+   while(templb)
+   {
+	  printf("%s", templb->str);
+	  templb = templb->next;
+   }
+}
+
 int main(int argc, char* argv[])
 {
    //test read file
@@ -34,7 +79,10 @@ int main(int argc, char* argv[])
 
    fill_buf(argv[1], lb);
    
-/*   if(is_discuz(lb) == 1)
+   illegal_part_deal(lb);
+   //test_annotate(lb); 
+   file_buf_write(lb, "test_file.html");
+   /*   if(is_discuz(lb) == 1)
    {
 	  discuz_fill_the_page(lb, &page);
 	  
@@ -43,7 +91,7 @@ int main(int argc, char* argv[])
    {
    }
 */
-	  no_discuz_fill_the_page(lb, &page);
+//	  no_discuz_fill_the_page(lb, &page);
   /*
    if(is_discuz(lb) == 1)
    {
@@ -57,8 +105,8 @@ int main(int argc, char* argv[])
    */
  //  else
  //  {
-	  printf("title:%s\n", page.title);
-	  printf("content:%s\n", page.content);
+//	  printf("title:%s\n", page.title);
+//	  printf("content:%s\n", page.content);
 //   }
   
    //   test_line_buf(lb);

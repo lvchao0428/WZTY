@@ -6,10 +6,10 @@
 
 void test_fillbuf(LineBuf* lb);			//测试linebuf
 
+void test_lpp(LablePosPair* lpp);
 
 void test_lable(char* line, LablePosPair* lpp);		//测试lable位置结构体数组的生成结果
 
-void test_lpp(LablePosPair* lpp);		//测试posPair
 
 void count_comma(LineBuf* lb);
 

@@ -3,6 +3,10 @@
 
 #include"def.h"
 
+void illegal_part_deal(LineBuf* lb);		//非法部分处理
+
+void annotation_part_handle(LineBuf** lb);	//处理注释部分
+
 LablePosPair* out_content_scope(char* line, LablePosPair* lpp);		//生成内容的下标范围
 
 LableType check_lable(char* line);		//检查此标签的对应内容的类型

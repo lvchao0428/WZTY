@@ -7,15 +7,35 @@
 
 #include"mystring.h"
 
+const char* mystrstri(const char* str, const char* subStr)
+{
+   int len = strlen(subStr);
+   if(len == 0)
+   {
+	  return NULL;
+   }
+
+   while(*str)
+   {
+	  if(strncasecmp(str, subStr, len) == 0)
+	  {
+		 return str;
+	  }
+	  ++str;
+   }
+   return NULL;
+}
 
 int mystrstr(char* father, char* son)
-{//测试前面的字符串是否包含后面字符串
+{//测试前面的字符串是否包含后面字符串,返回son在father里面出现的开始位置
    int i = 0;
+   int pos = 0;
    while(father[i] != '\0')
    {
 	  int j = 0;
 	  if(father[i] == son[j])
 	  {
+		 pos = i;
 		 while(son[j] != '\0')
 		 {
 			if(father[i+j] != son[j])
@@ -29,14 +49,14 @@ int mystrstr(char* father, char* son)
 		 }
 		 if(son[j] == '\0')
 		 {
-			return 1;
+			return pos;
 		 }
 	  }
 	  i++;
    }
    if(father[i] == '\0')
    {
-	  return 0;
+	  return -1;
    }
 }
 
@@ -50,6 +70,7 @@ int mystrcpy(char* dest, char* from, int begPos, int endPos)
    }
    dest[j] = '\0';
 }
+
 int find_comma_num_out(char* line)		//找到里面内容部分的标点数量
 {//找到字符串里面目标符号的数量
    
@@ -270,9 +291,9 @@ int return_son_str_pos(char* father, char* son)
 int print_str(char* str, int beg, int end)
 {
    int i = beg;
-   while(beg != end)
+   while(beg != (beg+end))
    {
-	 // printf("%c", str[beg]);
+	  printf("%c", str[beg]);
 	  beg++;
    }
    printf("\n");

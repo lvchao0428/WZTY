@@ -45,6 +45,7 @@ typedef struct Page
 //先按行存储文件
 typedef struct LineBuf
 {
+   int line_no;
    char* str;
    struct LineBuf* next;
    struct LineBuf* before;  

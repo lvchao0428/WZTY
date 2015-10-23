@@ -21,3 +21,28 @@ void test_fillbuf(LineBuf* lb)
    }
 }
 
+
+void test_lpp(LablePosPair* lpp)
+{
+   LablePosPair* p = lpp->next;
+   while(p)
+   {
+	  printf("left:%d\tright:%d\n", p->left, p->right);
+	  p = p->next;
+   }
+}
+
+/*
+int main(int argc, char* argv[])
+{
+   if(argc < 3)
+   {
+	  perror("need more args");
+	  exit(-1);
+   }
+
+   printf("pos:%d\n", mystrstr(argv[1],argv[2]));
+
+   return 0;
+}
+*/

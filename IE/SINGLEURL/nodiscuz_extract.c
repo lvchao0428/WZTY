@@ -22,7 +22,7 @@ int no_discuz_fill_the_page(LineBuf* pb, Page* page)
 	  
 	  LableType lt;
 
-	  lt = check_normal_lable(line);
+	  lt = check_normal_lable(beglb, line);
 	 // printf("%s\n", line);
 	  //处理注释的区域
 	 // deal_anno(&beglb);
@@ -39,16 +39,18 @@ int no_discuz_fill_the_page(LineBuf* pb, Page* page)
 			break;
 		 case CONTENTLABLE:
 			//检查所有div table标签，符合标准的一直找到标签为止
-			if(page->content_filled != 1)
+			//if(page->content_filled != 1)
 			{
-			   printf("conetne checked\n");
-			   deal_normal_content(&beglb, page);			
+			 //  printf("conetne checked\n");
+			  // deal_normal_content(&beglb, page);
+			   //test wordlen
+			//   int wordlen = word_length_get(beglg->str);
 			}
-
 			break;
 		 default:
 			break;
 	  }
+
 	  beglb = beglb->next;
    }
 }
@@ -64,13 +66,16 @@ void deal_normal_content(LineBuf** lb, Page* page)
 
    int comma_num = 0;
    
-   while(endlf != NULL && line_num < 5)
+
+   while(endlf && line_num < 5)
    {
 	  strcat(tempstr, endlf->str);
 	  endlf = endlf->next;
 	  line_num++;	  
    }
-
+   printf("content test......:%s\n", tempstr);
+   page->content_filled = 1; 
+/*
    LablePosPair* lpp = (LablePosPair*)malloc(sizeof(LablePosPair));
    lpp->next = NULL;
    out_content_scope(tempstr, lpp);
@@ -78,7 +83,7 @@ void deal_normal_content(LineBuf** lb, Page* page)
    comma_num = find_comma_num_out(tempstr, lpp);
    if(comma_num > 5 )//&& is_word_longer_than_lable(tempstr) == 1)
    {
-	 // analysis_content_lable(lb, tempstr);
+	  // analysis_content_lable(lb, tempstr);
 	  printf("tempstr:%s\n", tempstr);
 	  printf("comma_num:%d\n", comma_num); 
 	  //printf("-------------------------------------------------------\n");
@@ -90,14 +95,12 @@ void deal_normal_content(LineBuf** lb, Page* page)
 	 // LablePosPair* finalLpp = (LablePosPair*)malloc(sizeof(LablePosPair));
 	 // finalLpp->next = NULL;
 	  
-	//  find_all_greater_lower(tempstr, finalLpp);
+	  //  find_all_greater_lower(tempstr, finalLpp);
 	 // dispos_son_lable(tempstr, finalLpp);
 	 // printf("final string:%s\n", tempstr);
 	  //tempstr 存储处理好的内容
-	/*
 	  page->content = (char*)malloc(sizeof(char)*(strlen(tempstr) + 1));
 	  strcpy(page->content, tempstr);
-	  */
 	  page->content_filled = 1;
    }
    else if(comma_num == 0)
@@ -108,10 +111,10 @@ void deal_normal_content(LineBuf** lb, Page* page)
    {
 	  *lb = beglf->next;
    }
-
+*/
 }
 
-LableType check_normal_lable(LineBuf** lb, char* line)
+LableType check_normal_lable(LineBuf* lb, char* line)
 {//检查普通网页的标签类型
    
    LableType lt;
@@ -125,6 +128,7 @@ LableType check_normal_lable(LineBuf** lb, char* line)
    {
 	  //如果div标签开始，还要本行内容部分是否有文字如果有文字则看下面五行如果有标点则是内容可能性大
 	  int wordLen = word_length_get(line);
+	  printf("wordlen:%d\n", wordLen);
 	 // int lableLen = lable_length_get(line);
 	  if(wordLen <= 5)
 	  {
@@ -132,16 +136,25 @@ LableType check_normal_lable(LineBuf** lb, char* line)
 	  }
 	  else
 	  {
-		 LineBuf* templf = *lb;
+		 LineBuf* templf = lb;
 		 int count = 0;
 		 int comma_num = 0;
-		 while(count < 5)
+		 while(templf && count < 5)
 		 {
-			comma_num += find_comma_num_out()
+			comma_num += find_comma_num_out(templf->str);
+			templf = templf->next;
 			count++;
 		 }
+		 if(comma_num < 5)
+		 {
+			lt = NONLABLE;
+		 }
+		 else
+		 {
+			lt = CONTENTLABLE;
+		 }
+		 printf("comma_num:%d\n", comma_num);
 	  }
-	  lt = CONTENTLABLE;
    }
    
    return lt;

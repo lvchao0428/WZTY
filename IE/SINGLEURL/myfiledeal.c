@@ -7,7 +7,6 @@
 
 #include"myfiledeal.h"
 
-
 int fill_buf(char* filename, LineBuf* lb)
 {
    FILE* fp;
@@ -29,7 +28,7 @@ int fill_buf(char* filename, LineBuf* lb)
 	  no++;
 
 	  // printf("lineno:%d, len:%d, %s\n",no, len, line);
-	  if(line[0] == '\n')
+	  if(line[0] == '\n' || line[0] == '\r')
 		 continue;
 	  LineBuf* q = (LineBuf*)malloc(sizeof(LineBuf));
 	  //	  printf("len:%d, %s\n", strlen(line), line);
@@ -37,12 +36,12 @@ int fill_buf(char* filename, LineBuf* lb)
 	  
 	  q->next = NULL;
 	  strcpy(q->str, line);
-	  
+	  q->line_no = no; 
 	  if(lb->next == NULL)
 	  {
 		 lb->next = q;
 		 q->before = lb;
-		 p = q;
+		 p = p->next;
 	  }
 	  else
 	  {
@@ -56,6 +55,26 @@ int fill_buf(char* filename, LineBuf* lb)
    free(line);
 }
 
+int file_buf_write(LineBuf* lb, const char* filename)
+{
+   FILE* fp;
+   LineBuf* templb = lb->next;
+   if(!(fp = fopen(filename, "w")))
+   {
+	  perror("cannot write file");
+	  exit(-1);
+   }
+
+   while(templb)
+   {
+	  fwrite(templb->str,sizeof(char), strlen(templb->str), fp);
+//	  printf("%s", templb->str);
+	  templb = templb->next;
+   }
+   fclose(fp);
+
+   return 1;
+}
 
 int file_read_full(char** dest, const char* filename)
 {//把整个文件读成一个字符串
