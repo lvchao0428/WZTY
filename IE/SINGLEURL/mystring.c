@@ -71,11 +71,36 @@ int mystrcpy(char* dest, char* from, int begPos, int endPos)
    dest[j] = '\0';
 }
 
+int scope_str_cmp(char* dest, char* from, int dest_beg)
+{
+   int i = dest_beg, j = 0;
+   int len = strlen(from);
+   while(dest[i] != '\0' && from[j])
+   {
+	  if(character_to_lower(dest[i]) != from[j])
+	  {
+		 break;
+	  }
+	  i++;
+	  j++;
+   }
+
+   if(j == len)
+   {
+	  return 1;
+   }
+   else
+   {
+	  return 0;
+   }
+}
+
 int find_comma_num_out(char* line)		//找到里面内容部分的标点数量
 {//找到字符串里面目标符号的数量
    
-   char comma[3][5] = {
+   char comma[4][5] = {
 	  {","},
+	  {"、"},
 	  {"，"},
 	  {"。"},
    };
@@ -88,7 +113,7 @@ int find_comma_num_out(char* line)		//找到里面内容部分的标点数量
    while(p)
    {
 	  int j = 0;
-	  while(j < 3)
+	  while(j < 4)
 	  {
 		 comma_num += find_str_with_scope(line, comma[j], p->left, p->right);
 		 j++;
@@ -106,7 +131,7 @@ int word_length_get(char* line)		//获得字符串里面的内容长度
    wordLpp->next = NULL;
 
    out_content_scope(line, wordLpp);
-
+  // test_lpp(wordLpp);
    int wordlenSum = 0;
    LablePosPair* p = wordLpp->next;
    while(p)
@@ -220,6 +245,18 @@ int mycatNoN(char* dest, char* from)
    dest[i] = '\0';
 }
 
+char character_to_lower(char c)
+{
+   if(c >= 'A' && c <= 'Z')
+   {
+	  return  c + 32;
+   }
+   else
+   {
+	  return c;
+   }
+}
+
 int find_str_times(char* str, char* word)
 {//寻找str里面包含word字符串的数量
    int i = 0;
@@ -227,11 +264,11 @@ int find_str_times(char* str, char* word)
    while(str[i] != '\0')
    {//不包含重叠情况，也即，abababa，aba，应return 2；
 	  int j = 0;
-	  if(str[i] == word[j])
+	  if(character_to_lower(str[i]) == word[j])
 	  {
 		 while(word[j] != '\0')
-		 {
-			if(str[i+j] != word[j])
+		 {//不区分大小写的比较，str里面容许有大写字母
+			if(character_to_lower(str[i+j]) != word[j])
 			{
 			   break;
 			}
@@ -250,7 +287,6 @@ int find_str_times(char* str, char* word)
    }
 
    return times;
-
 }
 
 

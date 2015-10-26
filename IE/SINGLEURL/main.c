@@ -16,17 +16,28 @@
 
 #define TITLE_LEN 50
 
-/*
 void test_lable_fun(LineBuf* lb)
 {
-   if(!lb || strlen(lb->str) < 5)
+
+   LineBuf* templb = lb->next;
+  
+   while(templb)
    {
-	  return;
+	  if(strlen(templb->str) < 5)
+	  {
+		 templb = templb->next;
+		 continue;
+	  }
+	  LablePosPair* lpp = (LablePosPair*)malloc(sizeof(LablePosPair));
+	  lpp->next = NULL;
+	  printf("lineno:%d\tstrlen:%d\n", templb->line_no, strlen(templb->str));
+	  //find_all_greater_lower(templb->str, lpp);
+	  out_content_scope(templb->str, lpp);
+	  test_lpp(lpp);
+	  templb = templb->next;
    }
-   LablePosPair* lpp = (LablePosPair*)malloc(sizeof(LablePosPair));
-   lpp->next = NULL;
-   printf("lineno:%d\tstrlen:%d\n", lb->line_no, strlen(lb->str));
-  // find_all_greater_lower(lb->str, lpp);
+
+   /*
    LablePosPair* wordLpp = (LablePosPair*)malloc(sizeof(LablePosPair));
    wordLpp->next = NULL;
    out_content_scope(lb->str, wordLpp);
@@ -47,10 +58,10 @@ void test_lable_fun(LineBuf* lb)
 	  printf("word left:%d \tright:%d\n", q->left, q->right);
 	  q = q->next;
    }
-
+*/
 
 }
-*/
+
 void test_annotate(LineBuf* lb)
 {
    LineBuf* templb = lb->next;
@@ -80,6 +91,7 @@ int main(int argc, char* argv[])
    fill_buf(argv[1], lb);
    
    illegal_part_deal(lb);
+  // test_lable_fun(lb);
    //test_annotate(lb); 
    file_buf_write(lb, "test_file.html");
    /*   if(is_discuz(lb) == 1)
@@ -91,7 +103,7 @@ int main(int argc, char* argv[])
    {
    }
 */
-//	  no_discuz_fill_the_page(lb, &page);
+	  no_discuz_fill_the_page(lb, &page);
   /*
    if(is_discuz(lb) == 1)
    {
@@ -105,8 +117,8 @@ int main(int argc, char* argv[])
    */
  //  else
  //  {
-//	  printf("title:%s\n", page.title);
-//	  printf("content:%s\n", page.content);
+	  printf("title:%s\n", page.title);
+	  printf("content:%s\n", page.content);
 //   }
   
    //   test_line_buf(lb);

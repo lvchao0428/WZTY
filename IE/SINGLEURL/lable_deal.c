@@ -26,24 +26,31 @@ void illegal_part_deal(LineBuf* lb)
 	  else if(mystrstr(beglb->str, "<!--") >= 0)
 	  {//优先清除注释信息
 		 //printf("annotation:lineno:%d %s\n", beglb->line_no, beglb->str);
-		 annotation_part_handle(&beglb);
-		 //printf("after handle annotation:%s\n", beglb->str);
+		 //annotation_part_handle(&beglb);
 		 //printf("\n\n");
+		 illegal_lable_wipe(&beglb, "<!--", "-->");
+
+		 //printf("after handle annotation:%s\n\n\n", beglb->str);
+
 	  }
 	  else if(mystrstri(beglb->str, "<style"))
 	  {
-		 
+		 //printf("sylte:lineno:%d %s\n", beglb->line_no, beglb->str);
+		 illegal_lable_wipe(&beglb, "<style", "</style>") ;
+		 //printf("after handle style:%s\n\n\n", beglb->str);
 	  }
 	  else if(mystrstri(beglb->str, "<script"))
 	  {
-
+		// printf("script:lineno:%d %s\n", beglb->line_no, beglb->str);
+		 illegal_lable_wipe(&beglb, "<script", "</script>");
+		// printf("after handle scipt:%s\n\n\n", beglb->str);
 	  }
 	  beglb = beglb->next;
    }
 }
 
 void illegal_lable_wipe(LineBuf** lb, char* beglable, char* endlable)
-{
+{//清除注释区域
   LablePosPair* templpp = (LablePosPair*)malloc(sizeof(LablePosPair));
    templpp->next = NULL;
    LablePosPair* p = templpp;
@@ -57,10 +64,10 @@ void illegal_lable_wipe(LineBuf** lb, char* beglable, char* endlable)
 	  
 	  begLableNum = find_str_times(endlb->str, beglable);
 	  endLableNum = find_str_times(endlb->str, endlable);
-	  
-	//  printf("beglableNum:%d\t", begLableNum);
+	  //printf("str:%s\b", endlb->str); 
+	  //printf("beglableNum:%d\t", begLableNum);
 	  int begLableCount = 0;
-	 // printf("endlableNum:%d\n", endLableNum);
+	  //printf("endlableNum:%d\n", endLableNum);
 	  if(begLableNum == endLableNum)
 	  {//此句话有偶数个注释标签，所以此行的注释不会延伸到下一行，把
 		 //此行注释处理后把剩下的信息赋值回去。
@@ -72,7 +79,7 @@ void illegal_lable_wipe(LineBuf** lb, char* beglable, char* endlable)
 		 for(i = 0; i < len && begLableCount < begLableNum; ++i)
 		 {//找到所有的"<!--"
 			
-			if(c[i] == beglable[0] && c[i+1] == beglable[1])
+			if(scope_str_cmp(c, beglable, i))
 			{
 		//	   printf("%c\n", c[i]);
 			   LablePosPair* q = (LablePosPair*)malloc(sizeof(LablePosPair));
@@ -88,14 +95,14 @@ void illegal_lable_wipe(LineBuf** lb, char* beglable, char* endlable)
 		 
 		 i = 0;
 		 //找到结束字符的结束位置
-		 while(p && c[i+1] && c[i])
+		 while(p && c[i+strlen(endlable)-1])
 		 {
 			i = p->left;
-			while(p && c[i+1] && c[i])
+			while(p && c[i+strlen(endlable)-1])
 			{
-			   if(c[i] == endlable[strlen(endlable)-2] && c[i+1] == endlable[strlen(endlable)-1])
+			   if(scope_str_cmp(c, endlable, i))
 			   {
-				  p->right = i+1;
+				  p->right = i+strlen(endlable)-1;
 				  break;
 			   }
 			   i++;
@@ -104,30 +111,84 @@ void illegal_lable_wipe(LineBuf** lb, char* beglable, char* endlable)
 		 }
 
 		 //test lpp
-		 printf("test lpp\n");
-		 test_lpp(templpp);
+		 //printf("test lpp\n");
+		// test_lpp(templpp);
 
 		 //生成剩下的内容范围
 		 p = templpp->next;
+		 //如果是只有一对非法标签
 		 if(p->next == NULL)
-		 {
-			p->left = p->right+1;
-			p->right = strlen(endlb->str);
-		 }
-		 
-		 while(p && p->next)
-		 {
-			p->left = p->right+1;
-			p->right = p->next->left-1;
-			if(p->next->next == NULL)
-			{
-			   LablePosPair* temp = p->next;
-			   p->next = NULL;
-			   free(temp);
+		 {//如果非法标签只存在一组，则分成三种情况
+		 	//printf("single lpp \n");
+			if(p->left == 0)
+			{//标签在最前面，则后面的全是合法内容
+			   p->left = p->right+1;
+			   p->right = strlen(endlb->str)-1;
 			}
-			p = p->next;
+			else if(p->left > 0 && p->right < (strlen(endlb->str) - 3))//跳过\r\n
+			{//标签在中间，则两边的是合法内容，需要重新新建一个内容标签
+			   LablePosPair* contentLpp = (LablePosPair*)malloc(sizeof(LablePosPair));
+			   contentLpp->next = NULL;
+			   int templeft = p->left;
+			   int tempright = p->right;
+
+			   contentLpp->left = p->right + 1;
+			   contentLpp->right = strlen(endlb->str)-1;
+			   p->left = 0;
+			   p->right = templeft-1;
+			   p->next = contentLpp;
+			}
+			else
+			{//如果标签在最后面,则应该前面的都是内容部分
+			   p->right = p->left-1;
+			   p->left = 0;
+			}
 		 }
-		 
+		 else
+		 {
+			//两对以上的非法标签
+			//先把最前面的合法标签取出来
+			p = templpp;
+			LablePosPair* beforeLpp = (LablePosPair*)malloc(sizeof(LablePosPair));
+			if(p->next->left > 0)
+			{//如果最前面有合法标签则增加一个节点
+			   beforeLpp->next = p->next;
+			   beforeLpp->left = 0;
+			   beforeLpp->right = p->next->left-1;
+			   p->next = beforeLpp;
+
+			   p = beforeLpp->next;
+			}
+			else
+			{//如果最前面没有合法标签则直接从第一个标签处理
+			   p = templpp->next;
+			}
+			//把中间的内容标签填满
+			while(p && p->next)
+			{
+			   p->left = p->right+1;
+			   p->right = p->next->left-1;
+			   if(p->next->next == NULL)
+			   {
+				  if(p->next->right < strlen(endlb->str)-3)
+				  {//如果最后还有合法标签，则最后一个符号标签组保留为内容标签组
+					 p->next->left = p->next->right+1;
+					 p->next->right = strlen(endlb->str)-1;
+				  }
+				  else
+				  {//如果结尾处是非法标签则删除最后一个符号标签组
+					 LablePosPair* temp = p->next;
+					 p->next = NULL;
+					 free(temp);
+				  }
+			   }
+			   p = p->next;
+			}
+
+		 }
+
+		 //printf("test content lablepari:\n");
+		// test_lpp(templpp);
 		 p = templpp->next;
 		 c = endlb->str;
 		 //单行注释位置已经被标记完毕，把剩下内容赋值给原字符串
@@ -147,13 +208,12 @@ void illegal_lable_wipe(LineBuf** lb, char* beglable, char* endlable)
 	  }
 	  else if(begLableNum > endLableNum)
 	  {//如果是多行注释则合并成一行，下一回合处理
-		 printf("endlb->str:%s\n", endlb->str);
+		 //printf("endlb->str:%s\n", endlb->str);
 		 LineBuf* temptemplb = endlb;	//保存开始的指针，先计算长度，然后第二遍才分配空间
 		 int buffLen = 0;
-		 LineBuf* needToBeDeleteLb = temptemplb->next;
-		 char tempstr[10000];
-		 strcpy(tempstr, endlb->str);
-		 while(endlb && (mystrstr(endlb->str, endlable) == -1))
+		 LineBuf* needToBeDeleteLb = temptemplb;
+		 char tempstr[100000] = {0};
+		 while(endlb && (!mystrstri(endlb->str, endlable)))
 		 {
 			buffLen += strlen(endlb->str);
 			endlb = endlb->next;
@@ -162,26 +222,44 @@ void illegal_lable_wipe(LineBuf** lb, char* beglable, char* endlable)
 		 temptemplb->str = (char*)realloc(temptemplb->str, sizeof(char)*(buffLen+1));
 		 //这时候需要把temptemplb->next 一直到endlb的str付给temptemplb，并且把多余节点删掉
 		 LineBuf* q;
-		 
-		 while(needToBeDeleteLb != endlb)
+		 strcpy(tempstr, temptemplb->str);
+		 if(temptemplb != endlb)
 		 {
-//			printf("need lb:%s\n", needToBeDeleteLb->str);
-			strcat(tempstr, needToBeDeleteLb->str);
-			q = needToBeDeleteLb;
-			temptemplb->next = needToBeDeleteLb->next;
-			needToBeDeleteLb = needToBeDeleteLb->next;
-			free(q);
+			needToBeDeleteLb = temptemplb->next;
+			while(needToBeDeleteLb && needToBeDeleteLb != endlb)
+			{
+			   //			printf("need lb:%s\n", needToBeDeleteLb->str);
+			   strcat(tempstr, needToBeDeleteLb->str);
+			   printf("need to be:%d\n", endlb->line_no);
+			   q = needToBeDeleteLb;
+			   temptemplb->next = needToBeDeleteLb->next;
+			   needToBeDeleteLb = needToBeDeleteLb->next;
+			   free(q);
+			}
+
+			q = endlb;
+			if(endlb)
+			{
+			   temptemplb->next = endlb->next;
+			   strcat(tempstr, endlb->str);
+			}
+			else
+			{
+			   temptemplb->next = NULL;
+			}
+			// free(temptemplb->str);
+			//	 printf("len:%d\n", buffLen);
+			temptemplb->str = (char*)malloc(sizeof(char)*(buffLen+1));
+			strcpy(temptemplb->str, tempstr);
+
+			//printf("mul_len:%d %s\n", buffLen, temptemplb->str);
+			//printf("before:buflineno:%d\n", temptemplb->line_no);
 		 }
-		 q = endlb;
-		 strcat(tempstr, endlb->str);
-		// free(temptemplb->str);
-		 printf("len:%d\n", buffLen);
-		 temptemplb->str = (char*)malloc(sizeof(char)*(buffLen+1));
-		 temptemplb->next = endlb->next;
-		 strcpy(temptemplb->str, tempstr);
-		 
-		 printf("mul_len:%d %s\n", buffLen, temptemplb->str);
-		 *lb = temptemplb->before;
+		 else
+		 {
+			strcpy(temptemplb->str, tempstr);
+		 }
+		 *lb = (temptemplb->before->before->before);
 	  }
    }
   
@@ -250,8 +328,8 @@ void annotation_part_handle(LineBuf** lb)
 		 }
 
 		 //test lpp
-		 printf("test lpp\n");
-		 test_lpp(templpp);
+	//	 printf("test lpp\n");
+	//	 test_lpp(templpp);
 
 		 //生成剩下的内容范围
 		 p = templpp->next;
@@ -293,7 +371,7 @@ void annotation_part_handle(LineBuf** lb)
 	  }
 	  else if(begLableNum > endLableNum)
 	  {//如果是多行注释则合并成一行，下一回合处理
-		 printf("endlb->str:%s\n", endlb->str);
+		// printf("endlb->str:%s\n", endlb->str);
 		 LineBuf* temptemplb = endlb;	//保存开始的指针，先计算长度，然后第二遍才分配空间
 		 int buffLen = 0;
 		 LineBuf* needToBeDeleteLb = temptemplb->next;
@@ -321,54 +399,63 @@ void annotation_part_handle(LineBuf** lb)
 		 q = endlb;
 		 strcat(tempstr, endlb->str);
 		// free(temptemplb->str);
-		 printf("len:%d\n", buffLen);
+		 //printf("len:%d\n", buffLen);
 		 temptemplb->str = (char*)malloc(sizeof(char)*(buffLen+1));
 		 temptemplb->next = endlb->next;
 		 strcpy(temptemplb->str, tempstr);
 		 
-		 printf("mul_len:%d %s\n", buffLen, temptemplb->str);
+		 //printf("mul_len:%d %s\n", buffLen, temptemplb->str);
 		 *lb = temptemplb->before;
 	  }
    }
    
 }
 
-void style_lable_handle(LineBuf** lb)
-{//把style标签去除
-   //如果是一行数量为偶数，一次处理，如果为基数标签，则合并成一个之后
-   //交给下一回合之后再处理
-   
-
-}
 
 LablePosPair* out_content_scope(char* line, LablePosPair* lpp)
 {//把字符串中内容项的范围存储到lpp里面，也即除去标签之外的内容部分的下标范围
-   find_all_greater_lower(line, lpp);		//先把lpp里面存上大于号和小于号的位置，
-   LablePosPair* scan = lpp->next;
    
+   find_all_greater_lower(line, lpp);		//先把lpp里面存上大于号和小于号的位置，
+  // LablePosPair* scan = lpp->next;
+  
+   /*
    while(scan)
    {
 	  printf("left:%d  right:%d\n", scan->left, scan->right);
 	  scan = scan->next;
    }
-
+*/
    
-
-
-   /*
+   //printf("test greater lable:\n");
+  // test_lpp(lpp);
 
    //小于号和大于号之间即为内容范围
    LablePosPair* p = lpp->next;
    LablePosPair* q;
-   while(p && p->next) 
+   //如果标签只有一个则不含内容部分，置为（-1，-1）
+   if(lpp->next == NULL)
+   {
+	  return NULL;
+   }
+   if(p->next == NULL)
+   {
+	  p->left = -1;
+	  p->right = -1;
+	  return lpp;
+   }
+   while(p->next->next && p->next) 
    {
 	  p->left = p->right+1;
 	  p->right = p->next->left-1;
+	  if(p->next->next == NULL)
+	  {
+		 q = p->next;
+		 p->next = NULL;
+		 free(q);
+		 break;
+	  }
 	  p = p->next;
-
    }
-   //printf("lineno:%d\tproblem:%s\n", line);
-   p->next = NULL;
    
    //有些大于号和小于号之间没有内容，把这些无用的范围消除掉
    p = lpp;
@@ -396,7 +483,7 @@ LablePosPair* out_content_scope(char* line, LablePosPair* lpp)
 		 free(q);
 	  }
    }
- */
+   
    return lpp;
 }
 
@@ -457,7 +544,7 @@ void find_all_greater_lower(char* line, LablePosPair* lpp)
    while(line[i] != '\0')
    {
 	  if(line[i] == '<' && ((line[i+1] >= 'a' && line[i+1] <= 'z') || 
-							  (line[i+1] == '/')) )
+							  (line[i+1] == '/') || (line[i+1] == '!')) )
 	  {
 		 LablePosPair* q = (LablePosPair*)malloc(sizeof(LablePosPair));
 		 q->left = i;
@@ -582,16 +669,15 @@ int extract_content_with_punct(LineBuf** lb, char* line)
    lpp->next = NULL;
 
    //获取内容的范围列表,初始五行
-   //out_content_scope(line, lpp);
-   //char tempstr[100000];		//存储所有的粗糙内容部分
-   //strcpy(tempstr, line);
+   char tempstr[100000] = {0};		//存储所有的粗糙内容部分
+   strcpy(tempstr, line);
    LineBuf* templf = *lb;
    //步长为3如果三行里面的符号数量小于5个，就视为内容的最后一个节点
    int step = 0;
    while(templf)
    {
 	  step = 0;
-	  char temptempstr[100000];
+	  char temptempstr[100000]={0 };//存储追加的可能内容部分，符合的话归并到上述内容部分。
 	  while(templf && step != 5)
 	  {
 		 strcat(temptempstr, templf->str);
@@ -606,26 +692,36 @@ int extract_content_with_punct(LineBuf** lb, char* line)
 	  free_LablePosPair(templpp);
 	  if(comma_num >= 5)
 	  {
-		 printf("comma num:%d\n", comma_num);
-		 strcat(line, temptempstr);
-		 printf("temptempstr:%s\n", temptempstr);
+	//	 printf("comma num:%d\n", comma_num);
+		 strcat(tempstr, temptempstr);
+	//	 printf("temptempstr:%s\n", temptempstr);
 		 
 	  }
-	  else if(comma_num < 5)
+	  else if(comma_num < 5 && comma_num > 0)
 	  {
 		 //如果标点符号处于低谷值，那么作为结束的三行内容初始行。开始提取内容
 		 //否则继续往后面继续寻找
 		 //deal content
-		 printf("comma num:%d\n", comma_num);
-		 strcat(line, temptempstr);
-		 printf("temptempstr:%s\n", temptempstr);
-		 
+	//	 printf("comma num:%d\n", comma_num);
+		 strcat(tempstr, temptempstr);
+	//	 printf("temptempstr:%s\n", temptempstr);
+		 strcpy(line, tempstr);
 		 LablePosPair* puctLpp = (LablePosPair*)malloc(sizeof(LablePosPair));
 		 puctLpp->next = NULL;
 		 
-		 find_all_greater_lower(line, puctLpp);
-		 dispos_son_lable(line, puctLpp);
-		 printf("over check\n--------------------------------\n%s\n", line);
+		 out_content_scope(line, puctLpp);
+		 copy_scope_str_to_str(line, puctLpp);
+	//	 printf("over check\n--------------------------------\n%s\n", line);
+		 break;
+	  }
+	  else if(comma_num == 0)
+	  {
+		 LablePosPair* puctLpp = (LablePosPair*)malloc(sizeof(LablePosPair));
+		 puctLpp->next = NULL;
+		 strcpy(line, tempstr);
+		 out_content_scope(line, puctLpp);
+		 copy_scope_str_to_str(line, puctLpp);
+		 
 		 break;
 	  }
 
@@ -635,7 +731,7 @@ int extract_content_with_punct(LineBuf** lb, char* line)
 	  }
 
    }
-  *lb = templf;
+   *lb = templf;
 }
 /*
 int analysis_content_lable(LineBuf** lb, char* line)
