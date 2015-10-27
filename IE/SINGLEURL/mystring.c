@@ -77,6 +77,7 @@ int scope_str_cmp(char* dest, char* from, int dest_beg)
    int len = strlen(from);
    while(dest[i] != '\0' && from[j])
    {
+
 	  if(character_to_lower(dest[i]) != from[j])
 	  {
 		 break;
@@ -266,22 +267,30 @@ int find_str_times(char* str, char* word)
 	  int j = 0;
 	  if(character_to_lower(str[i]) == word[j])
 	  {
-		 while(word[j] != '\0')
-		 {//不区分大小写的比较，str里面容许有大写字母
-			if(character_to_lower(str[i+j]) != word[j])
-			{
-			   break;
-			}
-			else
-			{
-			   j++;
-			}
-		 }
-		 if(word[j] == '\0')
+		 if(i > 0 && str[i-1] == '\'')
 		 {
-			i+=j;
-			times ++;
+			
 		 }
+		 else
+		 {
+			while(word[j] != '\0')
+			{//不区分大小写的比较，str里面容许有大写字母
+			   if(character_to_lower(str[i+j]) != word[j])
+			   {
+				  break;
+			   }
+			   else
+			   {
+				  j++;
+			   }
+			}
+			if(word[j] == '\0')
+			{
+			   i+=j;
+			   times ++;
+			}
+		 }
+
 	  }
 	  i++;
    }

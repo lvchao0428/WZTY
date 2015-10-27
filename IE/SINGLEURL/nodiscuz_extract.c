@@ -42,9 +42,9 @@ int no_discuz_fill_the_page(LineBuf* pb, Page* page)
 			//检查所有div table标签，符合标准的一直找到标签为止
 			if(page->content_filled != 1)
 			{
-			   printf("conetne checked!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+			   //printf("conetne checked!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
 			   deal_normal_content(&beglb, page);
-			   printf("over extract contennt..........................\n\n\n");
+			   //printf("over extract contennt..........................\n\n\n");
 			   //test wordlen
 			//   int wordlen = word_length_get(beglg->str);
 			}
@@ -88,7 +88,7 @@ void deal_normal_content(LineBuf** lb, Page* page)
    comma_num = find_comma_num_out(tempstr);
    if(comma_num > 5 )//&& is_word_longer_than_lable(tempstr) == 1)
    {
-	 printf("tempstr:%s\n", tempstr);
+	 // printf("tempstr:%s\n", tempstr);
 	 
 	  extract_content_with_punct(&endlf, tempstr);
 	
@@ -146,9 +146,9 @@ LableType check_normal_lable(LineBuf* lb, char* line)
 	  }
 	  else
 	  {
-		 printf("comma_num:%d\n", comma_num); 
+		// printf("comma_num:%d\n", comma_num); 
 		 if(templf)
-			printf("lineno:%d\t%s\n", lb->line_no, tempstr);
+		//	printf("lineno:%d\t%s\n", lb->line_no, tempstr);
 		 lt = CONTENTLABLE;
 	  }
 	  // printf("lineno:%d\tcomma_num:%d\n\n\n", lb->line_no, comma_num);

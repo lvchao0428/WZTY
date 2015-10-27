@@ -65,10 +65,37 @@ void test_lable_fun(LineBuf* lb)
 void test_annotate(LineBuf* lb)
 {
    LineBuf* templb = lb->next;
+   lb->next = NULL;
    while(templb)
    {
 	  printf("%s", templb->str);
 	  templb = templb->next;
+   }
+}
+
+void test_illegal_Buf(LineBuf* lb)
+{
+   LineBuf* q = lb->next;
+   while(q)
+   {
+	  printf("lineno:%d\t, str:%s\n",q->line_no, q->str);
+	  q = q->next;
+   }
+}
+
+
+void free_dest_lb(LineBuf* dest)
+{
+   LineBuf* p = dest->next;
+   if(!p)
+   {
+	  return;
+   }
+   while(p)
+   {
+	  LineBuf* q = p;
+	  p = p->next;
+	  free(q);
    }
 }
 
@@ -90,20 +117,70 @@ int main(int argc, char* argv[])
 
    fill_buf(argv[1], lb);
    
+   LineBuf* dest = (LineBuf*)malloc(sizeof(LineBuf));
+   dest->next = NULL; 
+   
    illegal_part_deal(lb);
-  // test_lable_fun(lb);
+   find_lable(lb, dest);
+   printf("first test\n");
+   test_illegal_Buf(dest);
+   if(dest->next != NULL)
+   {
+	  printf("second wipe\n");
+	  illegal_part_deal(lb);
+   }
+   printf("second test\n");
+   test_illegal_Buf(dest);
+   find_lable(lb, dest);
+   if(dest->next != NULL)
+   {
+	  illegal_part_deal(lb);
+   }
+    
+   printf("third test\n");
+   test_illegal_Buf(dest);
+   //***********************
+   //count illegal lable
+  /*
+   int annobegNum = 0, annoendNum = 0, scriptbegNum = 0, scriptendNum = 0,\
+	   stylebegNum = 0, styleendNum = 0;
+   count_illegal_lable(lb,&annobegNum, &annoendNum,\
+		 &scriptbegNum, &scriptendNum,
+		 &stylebegNum, &styleendNum);
+   
+   printf("&annobegNum:%d, &annoendNum:%d,\
+		 &scriptbegNum:%d, &scriptendNum:%d,\
+		 &stylebegNum:%d, &styleendNum:%d\n",\
+		 annobegNum, annoendNum,\
+		 scriptbegNum, scriptendNum,\
+		 stylebegNum, styleendNum);
+   */
+   //find_lable(lb, dest);
+  /*
+   while(dest->next != NULL)
+   {
+	  free_dest_lb(dest);
+	  illegal_part_deal(lb);
+	  find_lable(lb, dest);
+   }
+   */
+   // test_lable_fun(lb);
    //test_annotate(lb); 
    file_buf_write(lb, "test_file.html");
    /*   if(is_discuz(lb) == 1)
    {
 	  discuz_fill_the_page(lb, &page);
-	  
+	 
    }
    else//非discuz网站
    {
    }
 */
-	  no_discuz_fill_the_page(lb, &page);
+  
+   ///find_lable(lb, dest);
+   //test_illegal_Buf(dest);
+ //  no_discuz_fill_the_page(lb, &page);
+   
   /*
    if(is_discuz(lb) == 1)
    {
@@ -117,8 +194,8 @@ int main(int argc, char* argv[])
    */
  //  else
  //  {
-	  printf("title:%s\n", page.title);
-	  printf("content:%s\n", page.content);
+//	  printf("title:%s\n", page.title);
+//	  printf("content:%s\n", page.content);
 //   }
   
    //   test_line_buf(lb);

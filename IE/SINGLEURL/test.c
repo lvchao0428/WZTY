@@ -31,8 +31,26 @@ void test_lpp(LablePosPair* lpp)
 	  p = p->next;
    }
 }
-
 /*
+const char* mystrstri(const char* str, const char* subStr)
+{
+   int len = strlen(subStr);
+   if(len == 0)
+   {
+	  return NULL;
+   }
+
+   while(*str)
+   {
+	  if(strncasecmp(str, subStr, len) == 0)
+	  {
+		 return str;
+	  }
+	  ++str;
+   }
+   return NULL;
+}
+
 int main(int argc, char* argv[])
 {
    if(argc < 3)
@@ -41,8 +59,10 @@ int main(int argc, char* argv[])
 	  exit(-1);
    }
 
-   printf("pos:%d\n", mystrstr(argv[1],argv[2]));
+   char* p = mystrstri(argv[1], argv[2]);
+   printf("p-1:%c, p:%c\n", *(p-1), *p);
+
 
    return 0;
-}
+}i
 */

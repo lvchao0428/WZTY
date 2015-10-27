@@ -3,6 +3,13 @@
 
 #include"def.h"
 
+void find_lable(LineBuf* lb, LineBuf* dest);
+
+void count_illegal_lable(LineBuf* lb, 
+	  int* annobegNum, int* annoendNum, 
+	  int* scriptbegNum, int* scriptendNum,
+	  int* stylebegNum, int* styleendNum);
+
 void illegal_part_deal(LineBuf* lb);		//非法部分处理
 
 void illegal_lable_wipe(LineBuf** lb, char* beglable, char* endlable);	//删除被被该字符串包裹的部分

@@ -8,14 +8,69 @@
 #include"lable_deal.h"
 #include"mystring.h"
 
+void find_lable(LineBuf* lb, LineBuf* dest)
+{
+   LineBuf* p = lb->next;
+   LineBuf* pdest = dest;
+   if(pdest->next)
+   {
+	  pdest->next = NULL;
+   }
+   while(p)
+   {
+	  if(mystrstri(p->str, "<script") ||
+			mystrstri(p->str, "<style") ||
+			mystrstri(p->str, "<!--"))
+	  {
+		 LineBuf* q = (LineBuf*)malloc(sizeof(LineBuf));
+		 q->next = NULL;
+		 q->line_no = p->line_no;
+		 q->str = (char*)malloc(sizeof(char)*(strlen(p->str) + 1));
+		 strcpy(q->str, p->str);
+		 pdest->next = q;
+		 pdest = pdest->next;
+	  }
+	  p = p->next;
+   }
+}
+
+void count_illegal_lable(LineBuf* lb, 
+	  int* annobegNum, int* annoendNum, 
+	  int* scriptbegNum, int* scriptendNum,
+	  int* stylebegNum, int* styleendNum)
+{
+   LineBuf* p = lb->next;
+   while(p)
+   {
+	  
+	  if(mystrstr(p->str,"<!--") || mystrstr(p->str, "-->"))
+	  {
+		 *annobegNum += find_str_times(p->str, "<!--");
+		 *annoendNum += find_str_times(p->str, "-->");
+	  }
+	  if(mystrstri(p->str, "<style") || mystrstri(p->str, "</style>"))
+	  {
+		 *stylebegNum += find_str_times(p->str, "<style");
+		 *styleendNum += find_str_times(p->str, "</style>");
+	  }
+	  if(mystrstri(p->str, "<script") || mystrstri(p->str, "</script>"))
+	  {
+		 *scriptbegNum += find_str_times(p->str, "<script");
+		 *scriptendNum += find_str_times(p->str, "</script>");
+	  }
+	  p = p->next;
+   }
+}
+
 void illegal_part_deal(LineBuf* lb)
 {
    LineBuf* beglb = lb->next;
 
    //删除注释信息和style 和script包含的信息
-   
+   char *p;
    while(beglb)
    {
+//	  printf("check beglb:%s\n", beglb->str);
 	  if((mystrstr(beglb->str, "<!--")== -1) && 
 			!(mystrstri(beglb->str, "<style")) &&
 			!(mystrstri(beglb->str, "<script")))
@@ -25,25 +80,31 @@ void illegal_part_deal(LineBuf* lb)
 	  }
 	  else if(mystrstr(beglb->str, "<!--") >= 0)
 	  {//优先清除注释信息
-		 //printf("annotation:lineno:%d %s\n", beglb->line_no, beglb->str);
+		// printf("annotation:lineno:%d %s\n", beglb->line_no, beglb->str);
 		 //annotation_part_handle(&beglb);
 		 //printf("\n\n");
 		 illegal_lable_wipe(&beglb, "<!--", "-->");
 
-		 //printf("after handle annotation:%s\n\n\n", beglb->str);
+		// printf("after handle annotation:%s\n\n\n", beglb->str);
 
 	  }
 	  else if(mystrstri(beglb->str, "<style"))
 	  {
-		 //printf("sylte:lineno:%d %s\n", beglb->line_no, beglb->str);
-		 illegal_lable_wipe(&beglb, "<style", "</style>") ;
-		 //printf("after handle style:%s\n\n\n", beglb->str);
+		
+		//	printf("sylte:lineno:%d %s\n", beglb->line_no, beglb->str);
+			illegal_lable_wipe(&beglb, "<style", "</style>") ;
+		//	printf("after handle style:%s\n\n\n", beglb->str);
+
+
 	  }
 	  else if(mystrstri(beglb->str, "<script"))
 	  {
-		// printf("script:lineno:%d %s\n", beglb->line_no, beglb->str);
-		 illegal_lable_wipe(&beglb, "<script", "</script>");
-		// printf("after handle scipt:%s\n\n\n", beglb->str);
+		///	printf("script:lineno:%d %s\n", beglb->line_no, beglb->str);
+
+		//	printf("beg ille wipe\n");
+			illegal_lable_wipe(&beglb, "<script", "</script>");
+		//	printf("after handle scipt:%s\n\n\n", beglb->str);
+		 
 	  }
 	  beglb = beglb->next;
    }
@@ -57,17 +118,19 @@ void illegal_lable_wipe(LineBuf** lb, char* beglable, char* endlable)
    LineBuf* beglb, *endlb, *templb;
    beglb = endlb = *lb;
    int done = 0;	//如果此次寻找注释区域已经完全则视为处理完成
-   
+  
+//   printf("%s lable check\n", beglable);
    if(endlb)
    {
 	  int begLableNum, endLableNum;
-	  
+	  printf("single line detect\n"); 
+	  //js代码的转义后字符已排除在外如"\'<script>"
 	  begLableNum = find_str_times(endlb->str, beglable);
 	  endLableNum = find_str_times(endlb->str, endlable);
 	  //printf("str:%s\b", endlb->str); 
-	  //printf("beglableNum:%d\t", begLableNum);
+//	  printf("beglableNum:%d\t", begLableNum);
 	  int begLableCount = 0;
-	  //printf("endlableNum:%d\n", endLableNum);
+//	  printf("endlableNum:%d\n", endLableNum);
 	  if(begLableNum == endLableNum)
 	  {//此句话有偶数个注释标签，所以此行的注释不会延伸到下一行，把
 		 //此行注释处理后把剩下的信息赋值回去。
@@ -81,6 +144,10 @@ void illegal_lable_wipe(LineBuf** lb, char* beglable, char* endlable)
 			
 			if(scope_str_cmp(c, beglable, i))
 			{
+			   if(c != &endlb->str[0] && *(c-1) == '\'')
+			   {
+				  continue;
+			   }
 		//	   printf("%c\n", c[i]);
 			   LablePosPair* q = (LablePosPair*)malloc(sizeof(LablePosPair));
 			   q->next = NULL;
@@ -156,7 +223,6 @@ void illegal_lable_wipe(LineBuf** lb, char* beglable, char* endlable)
 			   beforeLpp->left = 0;
 			   beforeLpp->right = p->next->left-1;
 			   p->next = beforeLpp;
-
 			   p = beforeLpp->next;
 			}
 			else
@@ -208,58 +274,115 @@ void illegal_lable_wipe(LineBuf** lb, char* beglable, char* endlable)
 	  }
 	  else if(begLableNum > endLableNum)
 	  {//如果是多行注释则合并成一行，下一回合处理
-		 //printf("endlb->str:%s\n", endlb->str);
+		 printf("multi line\n");
+	//	 printf("endlb->str:%s\n", endlb->str);
 		 LineBuf* temptemplb = endlb;	//保存开始的指针，先计算长度，然后第二遍才分配空间
 		 int buffLen = 0;
-		 LineBuf* needToBeDeleteLb = temptemplb;
+		 LineBuf* needToBeDeleteLb;
 		 char tempstr[100000] = {0};
+
+		 
+		 buffLen+= strlen(temptemplb->str);
+		 if(endlb->next)
+		 {//结束标签指针往后遍历一个然后再找结束标签
+			endlb = endlb->next;
+		 }
+	   
 		 while(endlb && (!mystrstri(endlb->str, endlable)))
 		 {
+			//printf("endlb no:%d, endstr:%s\n", endlb->line_no, endlb->str);
+
 			buffLen += strlen(endlb->str);
 			endlb = endlb->next;
 		 }
-		 buffLen += strlen(endlb->str);
-		 temptemplb->str = (char*)realloc(temptemplb->str, sizeof(char)*(buffLen+1));
+		 
+
+		 if(endlb == NULL)
+		 {
+			printf("beglablenum:%d, endlableNum:%d\n", begLableNum, endLableNum);
+//			LineBuf* ttlb = temptemplb->next;
+			printf("temptemptempstr:%s\nlieno:%d\n", temptemplb->str, temptemplb->line_no);
+			printf("NULLNULLNULL****************\n");
+		 }
+		 buffLen += strlen(endlb->str); 
+		 strcpy(tempstr, temptemplb->str);		//把第一个节点先赋值给tempstr，等复制完后几个节点一并付给lb->str
 		 //这时候需要把temptemplb->next 一直到endlb的str付给temptemplb，并且把多余节点删掉
 		 LineBuf* q;
-		 strcpy(tempstr, temptemplb->str);
-		 if(temptemplb != endlb)
+		 
+		 needToBeDeleteLb = temptemplb->next;
+	
+		 if(needToBeDeleteLb != endlb)
 		 {
-			needToBeDeleteLb = temptemplb->next;
-			while(needToBeDeleteLb && needToBeDeleteLb != endlb)
-			{
+			while(needToBeDeleteLb && needToBeDeleteLb->next && needToBeDeleteLb != endlb &&
+				  needToBeDeleteLb->next != endlb)
+			{//注意！ 双向链表
 			   //			printf("need lb:%s\n", needToBeDeleteLb->str);
 			   strcat(tempstr, needToBeDeleteLb->str);
-			   printf("need to be:%d\n", endlb->line_no);
+			   //printf("need to be:%d\n", endlb->line_no);
 			   q = needToBeDeleteLb;
+
 			   temptemplb->next = needToBeDeleteLb->next;
-			   needToBeDeleteLb = needToBeDeleteLb->next;
+			   needToBeDeleteLb->next->before = temptemplb;
+			   needToBeDeleteLb = temptemplb->next;
 			   free(q);
 			}
 
-			q = endlb;
-			if(endlb)
+		 }
+
+		 if(needToBeDeleteLb == endlb)
+		 {
+			if(endlb->next != NULL)
 			{
+			   q = endlb;
 			   temptemplb->next = endlb->next;
-			   strcat(tempstr, endlb->str);
+			   endlb->next->before = temptemplb;
+			   strcat(tempstr, q->str);
+			   //free(q);
 			}
 			else
-			{
+			{//endlb->next == NULL
+			   q = endlb;
 			   temptemplb->next = NULL;
+			   strcat(tempstr, q->str);
 			}
-			// free(temptemplb->str);
-			//	 printf("len:%d\n", buffLen);
-			temptemplb->str = (char*)malloc(sizeof(char)*(buffLen+1));
-			strcpy(temptemplb->str, tempstr);
-
-			//printf("mul_len:%d %s\n", buffLen, temptemplb->str);
-			//printf("before:buflineno:%d\n", temptemplb->line_no);
-		 }
-		 else
+		 }//needToBeDeleteLb != endlb
+		 else if(needToBeDeleteLb->next && needToBeDeleteLb->next == endlb)
 		 {
-			strcpy(temptemplb->str, tempstr);
+			printf("need == endl\n");
+
+			q = needToBeDeleteLb;
+			//needToBeDeleteLb
+			temptemplb->next = needToBeDeleteLb->next;
+			needToBeDeleteLb->next->before = temptemplb;
+			strcat(tempstr, needToBeDeleteLb->str);
+			//endlb
+			if(endlb->next)
+			{
+			   q = endlb;
+			   temptemplb->next = endlb->next;
+			   endlb->next->before = temptemplb;
+			   strcat(tempstr, q->str);
+			}
+			else
+			{//endlb->next == NULL
+			   q = endlb;
+			   temptemplb->next = NULL;
+			   strcat(tempstr, q->str);
+			}
 		 }
-		 *lb = (temptemplb->before->before->before);
+		 
+		 temptemplb->str = (char*)realloc(temptemplb->str, sizeof(char)*(buffLen+1));
+		 strcpy(temptemplb->str, tempstr);
+
+		 //printf("mul_len:%d %s\n", buffLen, temptemplb->str);
+		 //printf("before:buflineno:%d\n", temptemplb->line_no);
+
+		 
+		 *lb = (temptemplb->before->before);
+		 if(endlb == NULL)
+		 {
+			*lb = NULL;
+		 }
 	  }
    }
   
@@ -405,7 +528,7 @@ void annotation_part_handle(LineBuf** lb)
 		 strcpy(temptemplb->str, tempstr);
 		 
 		 //printf("mul_len:%d %s\n", buffLen, temptemplb->str);
-		 *lb = temptemplb->before;
+		 *lb = temptemplb->before->before;
 	  }
    }
    
@@ -425,7 +548,6 @@ LablePosPair* out_content_scope(char* line, LablePosPair* lpp)
 	  scan = scan->next;
    }
 */
-   
    //printf("test greater lable:\n");
   // test_lpp(lpp);
 
@@ -437,6 +559,7 @@ LablePosPair* out_content_scope(char* line, LablePosPair* lpp)
    {
 	  return NULL;
    }
+
    if(p->next == NULL)
    {
 	  p->left = -1;
