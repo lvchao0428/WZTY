@@ -27,7 +27,7 @@ void test_lpp(LablePosPair* lpp)
    LablePosPair* p = lpp->next;
    while(p)
    {
-	  printf("left:%d\tright:%d\n", p->left, p->right);
+	  printf("left:%d\t\tright:%d\n", p->left, p->right);
 	  p = p->next;
    }
 }
@@ -51,6 +51,7 @@ const char* mystrstri(const char* str, const char* subStr)
    return NULL;
 }
 
+			   print_str(str, )
 int main(int argc, char* argv[])
 {
    if(argc < 3)

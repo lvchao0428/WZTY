@@ -4,6 +4,7 @@
 
 #include"def.h"
 
+void file_content_batching_deal(char* bat_filename, char* out_file, Page* page);
 
 int fill_buf(char* filename, LineBuf* lb);	//把文件内容读取到linebuf里面
 

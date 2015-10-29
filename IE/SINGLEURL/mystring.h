@@ -5,6 +5,8 @@
 #include<string.h>
 #include"def.h"
 
+void filename_tail_clean(char* filename);
+
 const char* mystrstri(const char* str, const char* subStr);	//不区分大小写的字符串包含判断
 
 int mystrstr(char* father, char* son);			//测试前面字符串里面是否包含后面的字符串

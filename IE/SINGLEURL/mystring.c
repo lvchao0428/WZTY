@@ -7,6 +7,20 @@
 
 #include"mystring.h"
 
+
+void filename_tail_clean(char* filename)
+{
+   int i = 0;
+   while(filename[i] != '\0') i++;
+   i--;
+   while(filename[i] == '\n' || filename[i] == '\r')
+   {
+	  filename[i] = '\0';
+	  i--;
+   }
+
+}
+
 const char* mystrstri(const char* str, const char* subStr)
 {
    int len = strlen(subStr);
@@ -198,7 +212,7 @@ int find_str_with_scope(char* str, char* word, int begPos, int endPos)
    int i = begPos;
 
    int times = 0;
-   while(str[i] != '\0' && i < endPos)
+   while(i < strlen(str) && str[i] != '\0' && i < endPos)
    {
 	  //不包含重叠情况，也即，abababa，aba，应return 2；
 	  int j = 0;
@@ -215,7 +229,7 @@ int find_str_with_scope(char* str, char* word, int begPos, int endPos)
 			   j++;
 			}
 		 }
-		 if(word[j] == '\0')
+		 if(word[j] == '\0' )
 		 {
 			i+=j;
 			times ++;
@@ -262,14 +276,16 @@ int find_str_times(char* str, char* word)
 {//寻找str里面包含word字符串的数量
    int i = 0;
    int times = 0;
-   while(str[i] != '\0')
+   int len = strlen(str);
+   while(str[i] != '\0' && i < len)
    {//不包含重叠情况，也即，abababa，aba，应return 2；
 	  int j = 0;
 	  if(character_to_lower(str[i]) == word[j])
 	  {
-		 if(i > 0 && str[i-1] == '\'')
+		 if((i > 0 && str[i-1] == '\'' && str[i+1] != '/') 
+			)
 		 {
-			
+				
 		 }
 		 else
 		 {
@@ -297,7 +313,6 @@ int find_str_times(char* str, char* word)
 
    return times;
 }
-
 
 
 int return_son_str_pos(char* father, char* son)

@@ -99,6 +99,29 @@ void free_dest_lb(LineBuf* dest)
    }
 }
 
+void test_lb_comma(LineBuf* lb)
+{
+   LineBuf* p = lb->next;
+   while(p)
+   {
+	  LablePosPair* lpp = (LablePosPair*)malloc(sizeof(LablePosPair));
+	  lpp->next = NULL;
+	  int wordlen = word_length_get(p->str);
+	  int lablelen  = lable_length_get(p->str);
+	  int tempstr[100000] = {0 };
+	  //printf("line_no:%d, \tstr:%s\n", p->line_no, p->str);
+	  int commanum = find_comma_num_out(p->str);
+	  //printf("wordlen:%d\t, lablelen:%d\n", wordlen, lablelen);
+	  
+	  sprintf(tempstr, "line_no:%d, commanum:%d, str:%s\n", p->line_no, commanum, p->str);
+	  p->str = (char*)realloc(p->str, strlen(tempstr)+1);
+	  strcpy(p->str, tempstr);
+//	  out_content_scope(p->str, lpp);
+	  //printf("commanum:%d\n", commanum);
+	  p = p->next;
+   }
+}
+
 int main(int argc, char* argv[])
 {
    //test read file
@@ -119,9 +142,14 @@ int main(int argc, char* argv[])
    
    LineBuf* dest = (LineBuf*)malloc(sizeof(LineBuf));
    dest->next = NULL; 
-   
    illegal_part_deal(lb);
-   find_lable(lb, dest);
+   illegal_part_deal(lb);
+   illegal_part_deal(lb);
+   //illegal_part_deal(lb);
+
+  // find_lable(lb, dest);
+ //  test_illegal_Buf(dest);
+   /*
    printf("first test\n");
    test_illegal_Buf(dest);
    if(dest->next != NULL)
@@ -139,9 +167,9 @@ int main(int argc, char* argv[])
     
    printf("third test\n");
    test_illegal_Buf(dest);
+   */
    //***********************
    //count illegal lable
-  /*
    int annobegNum = 0, annoendNum = 0, scriptbegNum = 0, scriptendNum = 0,\
 	   stylebegNum = 0, styleendNum = 0;
    count_illegal_lable(lb,&annobegNum, &annoendNum,\
@@ -154,7 +182,6 @@ int main(int argc, char* argv[])
 		 annobegNum, annoendNum,\
 		 scriptbegNum, scriptendNum,\
 		 stylebegNum, styleendNum);
-   */
    //find_lable(lb, dest);
   /*
    while(dest->next != NULL)
@@ -165,8 +192,11 @@ int main(int argc, char* argv[])
    }
    */
    // test_lable_fun(lb);
-   //test_annotate(lb); 
+  
    file_buf_write(lb, "test_file.html");
+	  no_discuz_fill_the_page(lb, &page);
+  //  test_lb_comma(lb);
+   //test_annotate(lb); 
    /*   if(is_discuz(lb) == 1)
    {
 	  discuz_fill_the_page(lb, &page);
@@ -179,7 +209,8 @@ int main(int argc, char* argv[])
   
    ///find_lable(lb, dest);
    //test_illegal_Buf(dest);
- //  no_discuz_fill_the_page(lb, &page);
+   //
+   //test lb commma
    
   /*
    if(is_discuz(lb) == 1)
@@ -194,8 +225,8 @@ int main(int argc, char* argv[])
    */
  //  else
  //  {
-//	  printf("title:%s\n", page.title);
-//	  printf("content:%s\n", page.content);
+	  printf("title:%s\n", page.title);
+	  printf("content:%s\n", page.content);
 //   }
   
    //   test_line_buf(lb);
