@@ -8,33 +8,28 @@
 #include"myfiledeal.h"
 
 
-void file_content_batching_deal(char* bat_filename, char* out_file, Page* page)
+void file_content_batching_deal(LineBuf* lbp[N])
 {
-   FILE* fp;
-   char* line = NULL;
    
-   size_t len = 0;
-   size_t read_n = 0;
-
-   fp = fopen(bat_filename, "r");
-   if(fp == NULL)
+   //819 urls;
+   int filenum = 1;
+   while(filenum <= 819)
    {
-	  perror("cannot open bat file.");
-	  exit(-1);
-   }
-   LineBuf* fileBuf = (LineBuf*)malloc(sizeof(LineBuf));
-   fileBuf->next = NULL;
-   LineBuf* p = fileBuf;
-   //Page* temppage page->next;
-   while((read_n = getline(&line, &len, fp)) != -1)
-   {
-	  LineBuf* tempbuf = (LineBuf*)malloc(sizeof(LineBuf));
-	  tempbuf->next = NULL;
-	  tempbuf->str = (char*)malloc(sizeof(char)*(strlen(line)+1));
-	  strcpy(tempbuf->str, line);
-	  filename_tail_clean(tempbuf->str);
+	  char filename[50];
+	  sprintf(filename, "./bbshtmls/%d.html", filenum);
+	  fp = fopen(filename, "r");
+	  filenum++;
 
+	  if(fp == NULL)
+	  {
+		 perror("cannot open bat file.");
+		 exit(-1);
+	  }
+	  LineBuf* temphead = lbp[filenum]; 
+	  fill_buf(filename, temphead); 
+	   
    }
+
 }
 
 int fill_buf(char* filename, LineBuf* lb)
