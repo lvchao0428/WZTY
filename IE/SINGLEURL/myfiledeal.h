@@ -3,8 +3,11 @@
 
 
 #include"def.h"
+#define HTMLCOUNT 1024
 
-void file_content_batching_deal(char* bat_filename, char* out_file, Page* page);
+
+
+void file_content_batching_deal(LineBuf* lbp[HTMLCOUNT]);
 
 int fill_buf(char* filename, LineBuf* lb);	//把文件内容读取到linebuf里面
 

@@ -13,6 +13,8 @@ int mystrstr(char* father, char* son);			//测试前面字符串里面是否包�
 
 int mystrcpy(char* dest, char* from, int begPos, int endPos);	//把from字符串的下表范围里面的字符串拷贝到前面字符串
 
+int mystrcpy_with_point(char* dest, char* from, char* begpos,char* endpob);//使用指针标示位置的字符串复制函数
+
 //比较范围内的字符串是否匹配
 int scope_str_cmp(char* dest, char* from, int dest_beg);
 
@@ -38,6 +40,7 @@ int print_str(char* str, int beg, int end);		//打印beg到end里面的字符串
 
 
 int despace_betw_more_less(char* str);		//去掉大于号小于号之间的空格
+
 
 
 #endif
