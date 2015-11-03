@@ -8,31 +8,27 @@
 #include"myfiledeal.h"
 
 
-void file_content_batching_deal(LineBuf* lbp[N])
+void file_content_batching_deal(LineBuf* lbp[HTMLCOUNT])
 {
-   
+  
    //819 urls;
    int filenum = 1;
    while(filenum <= 819)
    {
 	  char filename[50];
-	  sprintf(filename, "./bbshtmls/%d.html", filenum);
-	  fp = fopen(filename, "r");
-	  filenum++;
+	  sprintf(filename, "./utf_html/%d.html", filenum);
 
-	  if(fp == NULL)
-	  {
-		 perror("cannot open bat file.");
-		 exit(-1);
-	  }
+	  
 	  LineBuf* temphead = lbp[filenum]; 
-	  fill_buf(filename, temphead); 
-	   
+	  fill_buf(filename, temphead, filenum); 
+	  printf("read html %d complete...\n", filenum);
+
+	  filenum++;
    }
 
 }
 
-int fill_buf(char* filename, LineBuf* lb)
+int fill_buf(char* filename, LineBuf* lb, int file_num)
 {
    FILE* fp;
    char* line = NULL;
@@ -59,7 +55,7 @@ int fill_buf(char* filename, LineBuf* lb)
 	  LineBuf* q = (LineBuf*)malloc(sizeof(LineBuf));
 	  //printf("len:%d, %s\n", strlen(line), line);
 	  q->str = (char*)malloc(sizeof(char)*(strlen(line)+1));
-	  
+	  q->file_no = file_num;
 	  q->next = NULL;
 	  strcpy(q->str, line);
 	  q->line_no = no; 
@@ -101,7 +97,6 @@ int file_buf_write(LineBuf* lb, const char* filename)
 
    return 1;
 }
-
 int file_read_full(char** dest, const char* filename)
 {//把整个文件读成一个字符串
    FILE* fp;

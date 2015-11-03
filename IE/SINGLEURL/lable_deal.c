@@ -43,10 +43,17 @@ void count_illegal_lable(LineBuf* lb,
    while(p)
    {
 	  
-	  if(mystrstr(p->str,"<!--") || mystrstr(p->str, "-->"))
+	  if(mystrstr(p->str,"<!--") != -1 || mystrstr(p->str, "-->") != -1)
 	  {
-		 *annobegNum += find_str_times(p->str, "<!--");
-		 *annoendNum += find_str_times(p->str, "-->");
+		 int t_b = 0, t_e = 0;
+		 anno_beg_end_times_fill(p->str, &t_b, &t_e);
+		 //*annobegNum += find_str_times(p->str, "<!--");
+		 //*annoendNum += find_str_times(p->str, "-->");
+		 //printf("t_b:%d, t_e:%d\n", t_b, t_e);
+		 *annobegNum += t_b;
+		 *annoendNum += t_e;
+		// printf("line:%d,\tbeganno:%d, endanno:%d\n", p->line_no, *annobegNum, *annoendNum);
+		 //printf("str:%s\n", p->str);
 	  }
 	  if(mystrstri(p->str, "<style") || mystrstri(p->str, "</style>"))
 	  {
@@ -57,6 +64,7 @@ void count_illegal_lable(LineBuf* lb,
 	  {
 		 *scriptbegNum += find_str_times(p->str, "<script");
 		 *scriptendNum += find_str_times(p->str, "</script>");
+		// printf("line:%d\t, beglb:%d, endlb:%d\n", p->line_no, *scriptbegNum, *scriptendNum);
 	  }
 	  p = p->next;
    }
@@ -78,7 +86,7 @@ void illegal_part_deal(LineBuf* lb)
 		 beglb = beglb->next;
 		 continue;
 	  }
-	  else if(mystrstr(beglb->str, "<!--") >= 0)
+	  else if(mystrstr(beglb->str, "<!--") != -1)
 	  {//优先清除注释信息
 		// printf("annotation:lineno:%d %s\n", beglb->line_no, beglb->str);
 		 //annotation_part_handle(&beglb);
@@ -125,67 +133,109 @@ void illegal_lable_wipe(LineBuf** lb, char* beglable, char* endlable)
 	  int begLableNum, endLableNum;
 	  //js代码的转义后字符已排除在外如"\'<script>"
 
-	  begLableNum = find_str_times(endlb->str, beglable);
-	  endLableNum = find_str_times(endlb->str, endlable);
-	  //printf("str:%s\b", endlb->str); 
-//	  printf("beglableNum:%d\tbeglable:%s\t", begLableNum, beglable);
+	  int is_anno = (mystrcmp(beglable, "<!--") || mystrcmp(endlable, "-->"));
+	  if(!is_anno)
+	  {
+		 begLableNum = find_str_times(endlb->str, beglable);
+		 endLableNum = find_str_times(endlb->str, endlable);
+	  }
+	  else
+	  {
+		 anno_beg_end_times_fill(endlb->str, &begLableNum, &endLableNum);
+	  }
+
+	 // printf("no:%d, str:%s\n", endlb->line_no, endlb->str); 
+	 // printf("beglableNum:%d\tbeglable:%s\t", begLableNum, beglable);
 	  int begLableCount = 0;
 
-//	  printf("endlableNum:%d\tendlable:%s\n", endLableNum, endlable);
+	  //printf("endlableNum:%d\tendlable:%s\n", endLableNum, endlable);
 //	  printf("endlstr:%s\n", endlb->str);
 	  if(begLableNum == endLableNum)
 	  {//此句话有偶数个注释标签，所以此行的注释不会延伸到下一行，把
 		 //此行注释处理后把剩下的信息赋值回去。
 		 int i = 0;
 		 char* c = endlb->str;
-//	  printf("single line detect\n"); 
+   //printf("single line detect\n"); 
 	//	 printf("begin start lable getting\n");
 		// printf("len:%d\n", strlen(c));
 		 int len = strlen(c);
-		 for(i = 0; i < len && begLableCount < begLableNum; ++i)
-		 {//找到所有的"<!--"
-			
-			if(scope_str_cmp(c, beglable, i))
+
+		 //注释型和其他的类型处理分开：
+		 if(!is_anno)
+		 {
+			for(i = 0; i < len && begLableCount < begLableNum; ++i)
 			{
-			   if(c != &endlb->str[0] && *(c-1) == '\'' )
+
+			   if(scope_str_cmp(c, beglable, i))
 			   {
-				  continue;
+				  if(c != &endlb->str[0] && *(c-1) == '\'' )
+				  {
+					 continue;
+				  }
+				  //	   printf("%c\n", c[i]);
+				  LablePosPair* q = (LablePosPair*)malloc(sizeof(LablePosPair));
+				  q->next = NULL;
+				  q->left = i;
+				  p->next = q;
+				  p = p->next;
+				  begLableCount++;
 			   }
-		//	   printf("%c\n", c[i]);
-			   LablePosPair* q = (LablePosPair*)malloc(sizeof(LablePosPair));
-			   q->next = NULL;
-			   q->left = i;
-			   p->next = q;
-			   p = p->next;
-			   begLableCount++;
+
 			}
 
-		 }
+			p = templpp->next;
 
-		 p = templpp->next;
-		 
-		 i = 0;
-		 //找到结束字符的结束位置
-		 while(p && c[i+strlen(endlable)-1])
-		 {
-			i = p->left;
+			i = 0;
+			//找到结束字符的结束位置
 			while(p && c[i+strlen(endlable)-1])
 			{
-			   if(scope_str_cmp(c, endlable, i))
+			   i = p->left;
+			   while(p && c[i+strlen(endlable)-1])
 			   {
-				  p->right = i+strlen(endlable)-1;
-				  break;
+				  if(scope_str_cmp(c, endlable, i))
+				  {
+					 p->right = i+strlen(endlable)-1;
+					 break;
+				  }
+				  i++;
 			   }
-			   i++;
+			   p = p->next;
 			}
-			p = p->next;
-		 }
 
+		 }//end if anno
+		 else
+		 {//开始处理注释标签的单行情况
+			i = 0;
+			while(i < len)
+			{
+			   if(i+3 < len && c[i] == '<' && c[i+1] == '!' && c[i+2] == '-' && c[i+3])
+			   {
+				  LablePosPair* q = (LablePosPair*)malloc(sizeof(LablePosPair));
+				  q->next = NULL;
+				  q->left = i;
+				  p->next = q;
+				  p = p->next;
+				  i+=3;
+				  //在找到一个开始注释标签以后直接原地寻找结束标签
+				  while(i < len) 
+				  {
+					if(c[i] == '-' && c[i+1] == '-' && c[i+2] == '>')
+					{
+					   q->right = i;
+					   i+=2;
+					}
+					i++;
+				  }
+			   }// end if
+			   i++;
+			}//end while
+
+		 }//end else
 		 //test lpp
 	//	 printf("lieno:%d,\ttest lpp\n", endlb->line_no);
 //		 test_lpp(templpp);
 
-		 //生成剩下的内容范围
+		 //后处理之前标记的标签组，删除不合理项（间距过近）
 		 p = templpp->next;
 		 //如果是只有一对非法标签
 		 if(p->next == NULL)

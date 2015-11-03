@@ -7,13 +7,15 @@
 
 void filename_tail_clean(char* filename);
 
+int mystrcmp(char* str, char* word);
+
 const char* mystrstri(const char* str, const char* subStr);	//不区分大小写的字符串包含判断
 
 int mystrstr(char* father, char* son);			//测试前面字符串里面是否包含后面的字符串
 
 int mystrcpy(char* dest, char* from, int begPos, int endPos);	//把from字符串的下表范围里面的字符串拷贝到前面字符串
 
-int mystrcpy_with_point(char* dest, char* from, char* begpos,char* endpob);//使用指针标示位置的字符串复制函数
+int mystrcpy_with_point(char* dest, char* from, char* begpos,char* endpos);//使用指针标示位置的字符串复制函数
 
 //比较范围内的字符串是否匹配
 int scope_str_cmp(char* dest, char* from, int dest_beg);
@@ -33,6 +35,8 @@ int mycatNoN(char* dest, char* from);			//把后面的字符串拼接到前面�
 char character_to_lower(char c);	//把字母返回小写
 
 int find_str_times(char* str, char* word);		//寻找后面字符串在前面字符串中出现的次数
+
+int anno_beg_end_times_fill(char* str, int* begtimes, int* endtimes);
 
 int return_son_str_pos(char* father, char* son);	//返回第一次出现son字符串的结束位置
 

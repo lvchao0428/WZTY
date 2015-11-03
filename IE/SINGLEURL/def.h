@@ -42,9 +42,12 @@ typedef struct Page
    int content_filled;
 }Page, *pPage;
 
+
+
 //先按行存储文件
 typedef struct LineBuf
 {
+   int file_no;
    int line_no;
    char* str;
    struct LineBuf* next;

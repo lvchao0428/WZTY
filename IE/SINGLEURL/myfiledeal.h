@@ -5,11 +5,9 @@
 #include"def.h"
 #define HTMLCOUNT 1024
 
-
-
 void file_content_batching_deal(LineBuf* lbp[HTMLCOUNT]);
 
-int fill_buf(char* filename, LineBuf* lb);	//把文件内容读取到linebuf里面
+int fill_buf(char* filename, LineBuf* lb, int file_num);	//把文件内容读取到linebuf里面
 
 int file_read_full(char** dest, const char* filename);		//把整个文件读取成一个字符串
 

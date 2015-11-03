@@ -16,52 +16,6 @@
 
 #define TITLE_LEN 50
 
-void test_lable_fun(LineBuf* lb)
-{
-
-   LineBuf* templb = lb->next;
-  
-   while(templb)
-   {
-	  if(strlen(templb->str) < 5)
-	  {
-		 templb = templb->next;
-		 continue;
-	  }
-	  LablePosPair* lpp = (LablePosPair*)malloc(sizeof(LablePosPair));
-	  lpp->next = NULL;
-	  printf("lineno:%d\tstrlen:%d\n", templb->line_no, strlen(templb->str));
-	  //find_all_greater_lower(templb->str, lpp);
-	  out_content_scope(templb->str, lpp);
-	  test_lpp(lpp);
-	  templb = templb->next;
-   }
-
-   /*
-   LablePosPair* wordLpp = (LablePosPair*)malloc(sizeof(LablePosPair));
-   wordLpp->next = NULL;
-   out_content_scope(lb->str, wordLpp);
-   LablePosPair* q = wordLpp->next;
-   //test greater & lower is embrace all 
-
-   
-
-   LablePosPair* p = lpp->next;
-   while(p)
-   {
-	  printf("lable left:%d %c\tright:%d %c\n", p->left, (lb->str[p->left]), p->right, (lb->str[p->right]));
-	  p = p->next;
-   }
-
-   while(q)
-   {
-	  printf("word left:%d \tright:%d\n", q->left, q->right);
-	  q = q->next;
-   }
-*/
-
-}
-
 void test_annotate(LineBuf* lb)
 {
    LineBuf* templb = lb->next;
@@ -98,7 +52,7 @@ void free_dest_lb(LineBuf* dest)
 	  free(q);
    }
 }
-
+/*
 void test_lb_comma(LineBuf* lb)
 {
    LineBuf* p = lb->next;
@@ -113,7 +67,7 @@ void test_lb_comma(LineBuf* lb)
 	  int commanum = find_comma_num_out(p->str);
 	  //printf("wordlen:%d\t, lablelen:%d\n", wordlen, lablelen);
 	  
-	  sprintf(tempstr, "line_no:%d, commanum:%d, str:%s\n", p->line_no, commanum, p->str);
+	  //sprintf(tempstr, "line_no:%d, commanum:%d, str:%s\n", p->line_no, commanum, p->str);
 	  p->str = (char*)realloc(p->str, strlen(tempstr)+1);
 	  strcpy(p->str, tempstr);
 //	  out_content_scope(p->str, lpp);
@@ -121,57 +75,84 @@ void test_lb_comma(LineBuf* lb)
 	  p = p->next;
    }
 }
+*/
 
+void test_lbp(LineBuf* lbp[HTMLCOUNT])
+{
+   int i;
+   for(i = 1; i <= 819; ++i)
+   {
+	  LineBuf* temp;
+	  temp = lbp[i]->next;
+	  while(temp)
+	  {
+		 printf("%s\n", temp->str);
+		 temp = temp->next;
+	  }
+	  
+   }
+}
 int main(int argc, char* argv[])
 {
    //test read file
    
 //   test_lable_stack();
+  /*
    if(argc != 2)
    {
 	  perror("two argv needed !\n");
 	  exit(-1);
    }
+*/
 
+   /*
+   LineBuf* lbp[HTMLCOUNT];
+   Page* page[HTMLCOUNT];
+   int i = 0;
+   for(i = 0; i < HTMLCOUNT; ++i)
+   {
+	  lbp[i] = (LineBuf*)malloc(sizeof(LineBuf));
+	  lbp[i]->next = NULL;
+	  page[i] = (Page*)malloc(sizeof(Page));
+   }
+
+   //int num;
+   file_content_batching_deal(lbp);	//读取所有819个网页
+   
+//   int null_count =    page_null_count(lbp);
+ //  printf("null count:%d\n", null_count);
+   
+
+   int correct_arr[HTMLCOUNT] = {0};
+   
+   page_dis_count(lbp, page, correct_arr); 
+   */
+
+   /*
+   while(num != -1)
+   {
+	  printf("enter num:");
+	  scanf("%d", &num);
+	  printf("is dis:%d\n", is_discuz(lbp[num]));
+   }
+   */
+   //test_lbp(lbp);
    Page page;
 
    LineBuf* lb = (LineBuf*)malloc(sizeof(LineBuf));
    lb->next = NULL;
 
-   fill_buf(argv[1], lb);
+   fill_buf(argv[1], lb, 0);
    
    LineBuf* dest = (LineBuf*)malloc(sizeof(LineBuf));
    dest->next = NULL; 
    illegal_part_deal(lb);
-   illegal_part_deal(lb);
-   illegal_part_deal(lb);
-   //illegal_part_deal(lb);
-
-  // find_lable(lb, dest);
- //  test_illegal_Buf(dest);
-   /*
-   printf("first test\n");
-   test_illegal_Buf(dest);
-   if(dest->next != NULL)
-   {
-	  printf("second wipe\n");
-	  illegal_part_deal(lb);
-   }
-   printf("second test\n");
-   test_illegal_Buf(dest);
-   find_lable(lb, dest);
-   if(dest->next != NULL)
-   {
-	  illegal_part_deal(lb);
-   }
-    
-   printf("third test\n");
-   test_illegal_Buf(dest);
-   */
-   //***********************
+  // illegal_part_deal(lb);
+  // illegal_part_deal(lb);
    //count illegal lable
    int annobegNum = 0, annoendNum = 0, scriptbegNum = 0, scriptendNum = 0,\
 	   stylebegNum = 0, styleendNum = 0;
+  
    count_illegal_lable(lb,&annobegNum, &annoendNum,\
 		 &scriptbegNum, &scriptendNum,
 		 &stylebegNum, &styleendNum);
@@ -182,55 +163,11 @@ int main(int argc, char* argv[])
 		 annobegNum, annoendNum,\
 		 scriptbegNum, scriptendNum,\
 		 stylebegNum, styleendNum);
-   //find_lable(lb, dest);
-  /*
-   while(dest->next != NULL)
-   {
-	  free_dest_lb(dest);
-	  illegal_part_deal(lb);
-	  find_lable(lb, dest);
-   }
-   */
-   // test_lable_fun(lb);
-  
-   file_buf_write(lb, "test_file.html");
-	  no_discuz_fill_the_page(lb, &page);
-  //  test_lb_comma(lb);
-   //test_annotate(lb); 
-   /*   if(is_discuz(lb) == 1)
-   {
-	  discuz_fill_the_page(lb, &page);
-	 
-   }
-   else//非discuz网站
-   {
-   }
-*/
-  
-   ///find_lable(lb, dest);
-   //test_illegal_Buf(dest);
-   //
-   //test lb commma
-   
-  /*
-   if(is_discuz(lb) == 1)
-   {
-	  printf("title:%s\n", page.title);
-	  printf("content:%s\n", page.content);
-	  printf("author:%s\n", page.author);
-	  printf("click num:%s\n", page.click_count);
-	  printf("replay num:%s\n", page.replay_count);
-	  printf("time:%s\n", page.time);
-   }
-   */
- //  else
- //  {
-	  printf("title:%s\n", page.title);
-	  printf("content:%s\n", page.content);
-//   }
-  
-   //   test_line_buf(lb);
-//   free_page(&page);
+
+   //file_buf_write(lb, "test_file.html");
+   //no_discuz_fill_the_page(lb, &page);
+   //printf("title:%s\n", page.title);
+   //printf("content:%s\n", page.content);
    
    return 0;
 }

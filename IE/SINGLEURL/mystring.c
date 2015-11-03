@@ -21,6 +21,20 @@ void filename_tail_clean(char* filename)
 
 }
 
+int mystrcmp(char* str, char* word)
+{
+   int i = 0;
+   while(str[i] != '\0')
+   {
+	  if(character_to_lower(str[i]) != word[i])
+	  {
+		 return 0;
+	  }
+	  i++;
+   }
+   return 1;
+}
+
 const char* mystrstri(const char* str, const char* subStr)
 {
    int len = strlen(subStr);
@@ -83,6 +97,18 @@ int mystrcpy(char* dest, char* from, int begPos, int endPos)
 	  dest[j++] = from[i++];
    }
    dest[j] = '\0';
+}
+
+
+int mystrcpy_with_point(char* dest, char* from, char* begpos,char* endpos)//使用指针标示位置的字符串复制函数
+{
+   int i = 0;
+   while(*begpos != '\0' && begpos != endpos)
+   {
+	  dest[i++] = *begpos;
+	  begpos++;
+   }
+   dest[i] = '\0';
 }
 
 int scope_str_cmp(char* dest, char* from, int dest_beg)
@@ -277,43 +303,89 @@ int find_str_times(char* str, char* word)
    int i = 0;
    int times = 0;
    int len = strlen(str);
-   while(str[i] != '\0' && i < len)
-   {//不包含重叠情况，也即，abababa，aba，应return 2；
-	  int j = 0;
-	  if(character_to_lower(str[i]) == word[j])
-	  {
-		 if((i > 0 && str[i-1] == '\'' && str[i+1] != '/') 
-			)
-		 {
-				
-		 }
-		 else
-		 {
-			while(word[j] != '\0')
-			{//不区分大小写的比较，str里面容许有大写字母
-			   if(character_to_lower(str[i+j]) != word[j])
-			   {
-				  break;
-			   }
-			   else
-			   {
-				  j++;
-			   }
-			}
-			if(word[j] == '\0')
-			{
-			   i+=j;
-			   times ++;
-			}
-		 }
+   int wordlen = strlen(word);
 
+   //先判断word是否是<script
+   int is_script = mystrcmp(word, "<script");
+   int is_anno = mystrcmp(word, "<!--");
+
+   if(!is_anno)
+   {
+	  while(str[i] != '\0' && i < len)
+	  {//不包含重叠情况，也即，abababa，aba，应return 2；
+		 int j = 0;
+		 if(character_to_lower(str[i]) == word[j])
+		 {
+			if((i > 0 && str[i-1] == '\'' && str[i+1] != '/' )||
+				  (is_script && i > 0 && str[i] == '<' && (str[i-1] == '"' || str[wordlen] == '"' || str[i-1] == '\'' || str[wordlen] == '\'' || str[i-1] == '\\')) )
+
+			{
+			   i++;
+			   continue;
+			}
+			else
+			{
+			   while(word[j] != '\0')
+			   {//不区分大小写的比较，str里面容许有大写字母
+				  if(character_to_lower(str[i+j]) != word[j])
+				  {
+					 break;
+				  }
+				  else
+				  {
+					 j++;
+				  }
+			   }
+			   if(word[j] == '\0')
+			   {
+				  i+=j;
+				  times ++;
+			   }
+			}
+
+		 }
+		 i++;
+	  }
+
+   }
+   return times;
+}
+
+int anno_beg_end_times_fill(char* str, int* begtimes, int* endtimes)
+{
+   int i = 0;
+   int begt = 0, endt = 0;
+   int len = strlen(str);
+   while(i < len)
+   {
+	  if(i+3 < len && str[i] == '<' && str[i+1] == '!' && str[i+2] == '-' && str[i+3] == '-')
+	  {
+		 begt++;
+		// printf("begtimes:%d\n", *begtimes);
+		// printf("****************************");
+		 i+=3;
+		 //直接在找到开始标签的位置找结束标签，再次嵌套其中的开始标签就被过滤掉了
+		 while(i < len)
+		 {
+			if(i+2 < len && str[i] == '-' && str[i+1] == '-' && str[i+2] == '>')
+			{
+			   endt++;
+			   i+=2;
+			   break;
+			}
+			i++;
+		 }
+	  }
+	  if(i+2 < len && str[i] == '-' && str[i+1] == '-' && str[i+2] == '>')
+	  {
+		 endt++;
 	  }
 	  i++;
    }
 
-   return times;
+   *begtimes = begt;
+   *endtimes = endt;
 }
-
 
 int return_son_str_pos(char* father, char* son)
 {//返回第一次出现son字符串的结束位置

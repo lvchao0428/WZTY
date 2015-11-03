@@ -105,18 +105,18 @@ int deal_clickAndreplay(LineBuf** lf, Page* page)
    tempstr[0] = '\0';
    LineBuf* endlf = templf;
    
-   if(mystrstr(endlf->str, "查看") != 1)
+   if(mystrstr(endlf->str, "查看") == -1)
    {
 	  return 0;
    }
    do{
-	  if(mystrstr(endlf->str, "</span>") == 1)
+	  if(mystrstr(endlf->str, "</span>") > 0)
 	  {
 		 endlf = endlf->next;
 		 break;
 	  }
 	  endlf = endlf->next;
-   }while(mystrstr(endlf->str, "</span>") != 1);
+   }while(mystrstr(endlf->str, "</span>") > 0);
    
    //printf("begin non\n");
    do{
@@ -256,7 +256,7 @@ int deal_content(LineBuf** lf, Page* page )
    tempstr[0] = '\0';
    LineBuf* endlf = templf;
    
-   while(endlf != NULL && (mystrstr(endlf->str, "</table>") != 1))
+   while(endlf != NULL && (mystrstr(endlf->str, "</table>") == -1))
    {
 	  nlen += strlen(endlf->str);
 	  mycatNoN(tempstr, endlf->str);
