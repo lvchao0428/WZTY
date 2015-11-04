@@ -38,11 +38,11 @@ int is_discuz(LineBuf* pb)
    while(beglb && beglb->next != NULL && mystrstr(beglb->str, "</head>") < 0)
    {
 	  strcat(temphead, beglb->str);
-	  printf("beg:str""%s\n", beglb->str);
+	  //printf("beg:str""%s\n", beglb->str);
 	  beglb = beglb->next;
    }
    strcat(temphead, beglb->str);
-   printf("head:%s fileno:%d\n", temphead, beglb->file_no);
+   //printf("head:%s fileno:%d\n", temphead, beglb->file_no);
    if(!beglb)
    {
 	  return 0;
@@ -91,9 +91,9 @@ void page_dis_count(LineBuf* lbp[HTMLCOUNT], Page* page[HTMLCOUNT], int* correct
 	  }
 	  else
 	  {
-		 printf("corrnum:%d\n", corr_j);
+		// printf("corrnum:%d\n", corr_j);
 		 //correct_arr[corr_j++] = i;	//累计正确的网页编号
-		 printf("count dis:%d\n", i);
+		// printf("count dis:%d\n", i);
 		 if(is_discuz(lbp[i]))
 		 {
 			dis_count++;
@@ -109,9 +109,9 @@ void page_dis_count(LineBuf* lbp[HTMLCOUNT], Page* page[HTMLCOUNT], int* correct
 	  }
 
 	  
+	 // printf("html:%d extract complete\n", i);
    }
-   printf("html:%d extract complete\n", i);
    dis_ratio = (double)dis_count/total_count;
-   printf("dis_count is :%d,total_count:%d, dis_ratio is:%lf\n", dis_count, total_count, dis_ratio);
+  // printf("dis_count is :%d,total_count:%d, dis_ratio is:%lf\n", dis_count, total_count, dis_ratio);
 }
 

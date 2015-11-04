@@ -104,8 +104,7 @@ int main(int argc, char* argv[])
 	  exit(-1);
    }
 */
-
-   /*
+  /* 
    LineBuf* lbp[HTMLCOUNT];
    Page* page[HTMLCOUNT];
    int i = 0;
@@ -116,7 +115,6 @@ int main(int argc, char* argv[])
 	  page[i] = (Page*)malloc(sizeof(Page));
    }
 
-   //int num;
    file_content_batching_deal(lbp);	//读取所有819个网页
    
 //   int null_count =    page_null_count(lbp);
@@ -125,18 +123,38 @@ int main(int argc, char* argv[])
 
    int correct_arr[HTMLCOUNT] = {0};
    
-   page_dis_count(lbp, page, correct_arr); 
-   */
-
-   /*
+   //page_dis_count(lbp, page, correct_arr); 
+   
+  
+   int num = 0;
+   //抽样测试代码:
    while(num != -1)
    {
+	  Page page;
 	  printf("enter num:");
 	  scanf("%d", &num);
-	  printf("is dis:%d\n", is_discuz(lbp[num]));
+	  if(is_discuz(lbp[num]))
+	  {
+		 discuz_fill_the_page
+	  }
+//	  printf("is dis:%d\n", is_discuz(lbp[num]));
+	  if(strlen(page[num]->content) < 10)
+	  {
+		 printf("title:%s\n", page[num]->title);
+		 printf("content extract failed\n");
+	  }
+	  else
+	  {
+		 printf("title:%s\n", page[num]->title);
+		 printf("content:%s\n", page[num]->content);
+	  }
+
    }
-   */
+   
    //test_lbp(lbp);
+   */
+   //
+   //单独测试代码
    Page page;
 
    LineBuf* lb = (LineBuf*)malloc(sizeof(LineBuf));
@@ -147,7 +165,7 @@ int main(int argc, char* argv[])
    LineBuf* dest = (LineBuf*)malloc(sizeof(LineBuf));
    dest->next = NULL; 
    illegal_part_deal(lb);
-  // illegal_part_deal(lb);
+   illegal_part_deal(lb);
   // illegal_part_deal(lb);
    //count illegal lable
    int annobegNum = 0, annoendNum = 0, scriptbegNum = 0, scriptendNum = 0,\
@@ -165,9 +183,12 @@ int main(int argc, char* argv[])
 		 stylebegNum, styleendNum);
 
    //file_buf_write(lb, "test_file.html");
-   //no_discuz_fill_the_page(lb, &page);
-   //printf("title:%s\n", page.title);
-   //printf("content:%s\n", page.content);
-   
+  // discuz_fill_the_page(lb, &page);
+  no_discuz_fill_the_page(lb, &page);
+   printf("title:%s\n", page.title);
+   //printf("time:%s\n", page.time);
+  // printf("clickcount:%s\n", page.click_count);
+   //printf("replaycount:%s\n", page.replay_count);
+   printf("content:%s\n", page.content);
    return 0;
 }

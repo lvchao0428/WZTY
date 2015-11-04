@@ -28,6 +28,10 @@ void copy_scope_str_to_str(char* str, LablePosPair* lpp);	//把lpp内存储范�
 
 int content_until_lable_end_extract(LineBuf* lb, char* line);	//提取内容的方法2
 
+int deal_adver(char* tempstr);
+
+int href_extract(char* tempstr, LablePosPair* lpp);
+
 int extract_content_with_punct(LineBuf** lb, char* line);	//使用标点符号密度定位内容部分
 
 int analysis_content_lable(char* line, LableElem* le);		//分析content line里面的标签

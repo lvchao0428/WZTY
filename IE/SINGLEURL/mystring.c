@@ -66,7 +66,7 @@ int mystrstr(char* father, char* son)
 		 pos = i;
 		 while(son[j] != '\0')
 		 {
-			if(father[i+j] != son[j])
+			if(character_to_lower(father[i+j]) != son[j])
 			{
 			   break;
 			}

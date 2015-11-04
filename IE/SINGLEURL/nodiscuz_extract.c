@@ -74,7 +74,7 @@ void deal_normal_content(LineBuf** lb, Page* page)
 
    strcpy(tempstr, endlf->str);
    endlf = endlf->next;
-   while(endlf && line_num < 4)
+   while(endlf && line_num < 10)
    {
 	  strcat(tempstr, endlf->str);
 	  endlf = endlf->next;
@@ -98,7 +98,7 @@ void deal_normal_content(LineBuf** lb, Page* page)
 	 // printf("tempstr:%s\n", tempstr);
 	 
 	  extract_content_with_punct(&endlf, tempstr);
-	
+	  	
 	  //tempstr 存储处理好的内容
 	  page->content = (char*)malloc(sizeof(char)*(strlen(tempstr) + 1));
 	  strcpy(page->content, tempstr);
@@ -141,7 +141,7 @@ LableType check_normal_lable(LineBuf* lb, char* line)
 	  int count = 0;
 	  int comma_num = 0;
 	  char tempstr[100000] = {0};
-	  while(templf && count < 5)
+	  while(templf && count < 10)
 	  {
 		 strcat(tempstr, templf->str);
 		 count++;

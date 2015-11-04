@@ -26,6 +26,11 @@ typedef int LableType;
 #define ENDLABLE		7
 #define NONLABLE		-1
 
+typedef int ContentType;	//内容前面的标签类型
+#define HREFTYPE		0
+#define NORMALTYPE		1
+
+
 typedef struct Page
 {
    char* title;
@@ -49,6 +54,7 @@ typedef struct LineBuf
 {
    int file_no;
    int line_no;
+   ContentType ct;
    char* str;
    struct LineBuf* next;
    struct LineBuf* before;  

@@ -221,7 +221,7 @@ void illegal_lable_wipe(LineBuf** lb, char* beglable, char* endlable)
 				  {
 					if(c[i] == '-' && c[i+1] == '-' && c[i+2] == '>')
 					{
-					   q->right = i;
+					   q->right = i+2;
 					   i+=2;
 					}
 					i++;
@@ -774,7 +774,7 @@ void find_all_greater_lower(char* line, LablePosPair* lpp)
    LablePosPair* p = lpp;
    while(line[i] != '\0')
    {
-	  if(line[i] == '<' && ((line[i+1] >= 'a' && line[i+1] <= 'z') || (line[i+1] == '/') || (line[i+1] == '!')) )
+	  if(line[i] == '<' && ((line[i+1] >= 'a' && line[i+1] <= 'z') || (line[i+1] == '/') || (line[i+1] == '!')) || (line[i+1] >= 'A' && line[i+1] <= 'Z'))
 	  {
 		 LablePosPair* q = (LablePosPair*)malloc(sizeof(LablePosPair));
 		 q->left = i;
@@ -895,6 +895,39 @@ int content_until_lable_end_extract(LineBuf* lb, char* line)
 
 }
 
+int deal_adver(char* tempstr)
+{
+   
+}
+
+int href_extract(char* tempstr, LablePosPair* lpp)
+{//提取出所有的连接
+   //首先取出所有链接，找到开始和结束位置，然后决定删除那些链接。
+   int i = 0;
+   LablePosPair* p = lpp;
+   while(tempstr[i])
+   {//找到所有的链接开始位置
+	  int left;
+	  if((left = mystrstr(tempstr+i, "<a href")) != -1)
+	  {
+		 LablePosPair* q = (LablePosPair*)malloc(sizeof(LablePosPair));
+		 q->next = NULL;
+		 q->left = left;
+		 p->next = q;
+		 p = p->next;
+		 i = left;
+	  }
+	  i++;
+   }
+   i = 0;
+   //找到链接的结束位置
+   while(tempstr[i])
+   {
+
+   }
+
+}
+
 int extract_content_with_punct(LineBuf** lb, char* line)
 {
    LablePosPair* lpp = (LablePosPair*)malloc(sizeof(LablePosPair));
@@ -956,6 +989,12 @@ int extract_content_with_punct(LineBuf** lb, char* line)
    //find_all_greater_lower(tempstr, lpp);
    //dispos_son_lable(tempstr, lpp);
   // int comNum = find_comma_num_out(tempstr);
+   
+   //这里提取的区域仍然较大，需要把广告链接等去掉
+   deal_adver(tempstr);
+
+   //
+   //
    out_content_scope(tempstr, lpp);
    copy_scope_str_to_str(tempstr, lpp);
   // printf("commanum:%d\n", comNum);
