@@ -21,3 +21,24 @@ void test_fillbuf(LineBuf* lb)
    }
 }
  
+void test_lpp(LablePosPair* lpp, char* str)
+{
+   LablePosPair* p = lpp->next;
+   while(p)
+   {
+	  printf("left:%d , right:%d, type:%d,", p->left, p->right, p->lt);
+//	  printf(":%s\n", )
+	  print_str(str, p->left, p->right);
+	  p = p->next;
+   }
+}
+void test_scope_lpp(LablePosPair* beglpp, LablePosPair* endlpp, char* str)
+{
+   while(beglpp != endlpp)
+   {
+	  printf("left:%d , right:%d, type:%d,", beglpp->left, beglpp->right, beglpp->lt);
+//	  printf(":%s\n", )
+	  print_str(str, beglpp->left, beglpp->right);
+	  beglpp = beglpp->next;
+   }
+}

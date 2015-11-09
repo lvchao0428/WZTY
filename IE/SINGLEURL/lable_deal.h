@@ -28,9 +28,9 @@ void copy_scope_str_to_str(char* str, LablePosPair* lpp);	//把lpp内存储范�
 
 int content_until_lable_end_extract(LineBuf* lb, char* line);	//提取内容的方法2
 
-int deal_adver(char* tempstr);
+int deal_adver(char* tempstr, LablePosPair* lpp, LablePosPair* lastlpp[LASTLINKNUM]);
 
-int href_extract(char* tempstr, LablePosPair* lpp);
+//int href_extract(char* tempstr, LablePosPair* lpp);
 
 int extract_content_with_punct(LineBuf** lb, char* line);	//使用标点符号密度定位内容部分
 
@@ -45,8 +45,6 @@ void pop_lable(LableElem* le);		//pop lable
 int get_elem_stack_size(LableElem* head);
 
 void deal_anno(LineBuf** lb);		//跳过注释区域
-
-void deal_script(LineBuf** lb);		//跳过javascript代码
 
 void free_LablePosPair(LablePosPair* lpp);
 

@@ -14,7 +14,7 @@
 
 
 #define BUFSIZE 1024
-
+#define LASTLINKNUM 100
 typedef int LableType;
 #define TITLELABLE		0
 #define AUTHORLABLE		1
@@ -24,9 +24,15 @@ typedef int LableType;
 #define CONTENTLABLE	5
 #define BEGINLABLE		6
 #define ENDLABLE		7
+
+//追加labletype 这里是区分是否是链接
+#define LINKTYPE		8
+#define ENDLINKTYPE		9
+#define NOLINKTYPE		10
 #define NONLABLE		-1
 
 typedef int ContentType;	//内容前面的标签类型
+
 #define HREFTYPE		0
 #define NORMALTYPE		1
 
@@ -80,7 +86,9 @@ typedef struct LablePosPair
 {
    int left;
    int right;
+   struct LablePosPair* before;
    struct LablePosPair* next;
+   LableType lt;
 }LablePosPair, *pLablePosPair;
 
 

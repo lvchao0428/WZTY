@@ -769,6 +769,7 @@ LableType check_lable(char* line)
 
 void find_all_greater_lower(char* line, LablePosPair* lpp)
 {//找到所有的大于号和小于号的位置
+   //1105更新：追加类型标签
    int i = 0;
    //找到所有'<'的位置
    LablePosPair* p = lpp;
@@ -776,11 +777,28 @@ void find_all_greater_lower(char* line, LablePosPair* lpp)
    {
 	  if(line[i] == '<' && ((line[i+1] >= 'a' && line[i+1] <= 'z') || (line[i+1] == '/') || (line[i+1] == '!')) || (line[i+1] >= 'A' && line[i+1] <= 'Z'))
 	  {
+		
 		 LablePosPair* q = (LablePosPair*)malloc(sizeof(LablePosPair));
 		 q->left = i;
 		 q->next = NULL;
 		 p->next = q;
+		 p->next->before = p;
 		 p = p->next;
+
+		 //看后面是否是链接类型
+		 if(scope_str_cmp(line, "<a ", i))
+		 {// is a link lable
+			q->lt = LINKTYPE;
+
+		 }
+		 else if(scope_str_cmp(line, "</a>", i))
+		 {
+			q->lt = ENDLINKTYPE;	
+		 }
+		 else
+		 {//not a link lable
+			q->lt = NOLINKTYPE;
+		 }
 	  }
 	  i++;
    }
@@ -825,8 +843,6 @@ void dispos_son_lable(char* str, LablePosPair* lpp)
 	  {
 		 str[j++] = str[i++]; 
 	  }
-	  
-	  
    }
    str[j] = '\0';
 }
@@ -895,11 +911,107 @@ int content_until_lable_end_extract(LineBuf* lb, char* line)
 
 }
 
-int deal_adver(char* tempstr)
+int deal_adver(char* tempstr, LablePosPair* lpp, LablePosPair* lastlpp[LASTLINKNUM])
 {
+   LablePosPair* p = lpp->next;
+   LablePosPair* q;
+   int space = 0;
+   int count = 0;
+   //合并过近标签
+   while(p)
+   {//检查标签间距
+	  if(p->lt == ENDLINKTYPE || p->lt == LINKTYPE)
+	  {
+		 if(p->next && p->next->lt != LINKTYPE && (p->next->left - p->right < 3))
+		 {
+			q = p->next;
+			p->right = q->right;
+			p->next = q->next;
+			if(q->next)
+			{
+			   q->next->before = p;
+			}
+			free(q);
+		 }
+		 else
+		 {
+			p = p->next;
+		 }
+		 
+	  }
+	  else
+	  {
+		 p = p->next;
+	  }
+   }
+   
+   //找到连续链接的位置，大于两次即可
+   p = lpp->next;
+   count = 0;
+   LablePosPair* beglpp,* endlpp;
+  
+   printf("begin check end commercial:\n");
+   while(p && p->next)
+   {
+	  //找到一个最近的广告标签,现在只能找到一个广告群
+	  while(p && p->next && p->lt != ENDLINKTYPE)
+	  {
+		 p = p->next;
+		 beglpp = p;
+	  }
+//	  printf("lable:%d")
+	  if(p->next->lt != LINKTYPE)
+	  {
+		 p = p->next;
+		 continue;
+	  }
+	  if(p->next->lt == LINKTYPE)
+	  {//如果是连续广告，则找到结束的位置,连续广告需要考虑结束标签和下一个网页开始标签是否间距为0
+		 int end_flag = 0;
+		 while(end_flag == 0 && p->next)
+		 {
+			if(p->lt == LINKTYPE || p->lt == ENDLINKTYPE)
+			{
+			   if(p->lt == ENDLINKTYPE && p->next->lt == LINKTYPE)
+			   {
+				  int gap = p->next->left - p->right;
+				  if(gap != 0)
+				  {
+					 break;
+				  }
+			   }
+			   count++;
+			   endlpp = p;
+			   p = p->next;
+			}
+			else
+			{
+			   end_flag = 1;
+			}
+		 }
+	  }
+	  else
+	  {//否则则认为暂无连续广告
+		 beglpp = NULL;
+	  }
+	  p = p->next;
+	  if(count > 3)
+	  {
+		 break;
+	  }
+   }
+
+   if(count > 3)
+   {
+	  printf("has commercial\n");
+	  test_scope_lpp(beglpp, endlpp, tempstr);
+	  printf("end commercial\n");
+   }
+   //
    
 }
 
+/*
 int href_extract(char* tempstr, LablePosPair* lpp)
 {//提取出所有的连接
    //首先取出所有链接，找到开始和结束位置，然后决定删除那些链接。
@@ -923,10 +1035,10 @@ int href_extract(char* tempstr, LablePosPair* lpp)
    //找到链接的结束位置
    while(tempstr[i])
    {
-
+	  
    }
-
 }
+*/
 
 int extract_content_with_punct(LineBuf** lb, char* line)
 {
@@ -955,6 +1067,7 @@ int extract_content_with_punct(LineBuf** lb, char* line)
 	  out_content_scope(temptempstr, templpp);	//找到最近三行的所有标签和标点数量
 	  int comma_num = find_comma_num_out(temptempstr);
 	  free_LablePosPair(templpp);
+	  
 	  if(comma_num >= 5)
 	  {
 	//	 printf("comma num:%d\n", comma_num);
@@ -986,17 +1099,21 @@ int extract_content_with_punct(LineBuf** lb, char* line)
 	  }
 
    }
-   //find_all_greater_lower(tempstr, lpp);
-   //dispos_son_lable(tempstr, lpp);
-  // int comNum = find_comma_num_out(tempstr);
+   find_all_greater_lower(tempstr, lpp);
    
-   //这里提取的区域仍然较大，需要把广告链接等去掉
-   deal_adver(tempstr);
+   test_lpp(lpp, tempstr);
 
+   // int comNum = find_comma_num_out(tempstr);
+   LablePosPair* lastlpp[LASTLINKNUM];
+   //这里提取的区域仍然较大，需要把广告链接等去掉
+   deal_adver(tempstr, lpp, lastlpp);
+   test_lpp(lpp, tempstr);
+   dispos_son_lable(tempstr, lpp);
+    
    //
    //
-   out_content_scope(tempstr, lpp);
-   copy_scope_str_to_str(tempstr, lpp);
+   //out_content_scope(tempstr, lpp);
+   //copy_scope_str_to_str(tempstr, lpp);
   // printf("commanum:%d\n", comNum);
    strcpy(line, tempstr);
    *lb = templf;
@@ -1143,28 +1260,6 @@ void deal_anno(LineBuf** lb)		//跳过注释区域
    *lb = templf;
 }
 
-
-void deal_script(LineBuf** lb)		//跳过javascript代码
-{
-   LineBuf* templf = *lb;
-
-   if(mystrstr(templf->str, "<script") ||
-		 mystrstr(templf->str, "<SCRIPT>"))
-   {
-	  while(mystrstr(templf->str, "</SCRIPT>") ||
-			mystrstr(templf->str, "</script>"))
-	  {
-		 templf = templf->next;
-	  }
-   }
-   else
-   {
-	  return;
-
-   }
-
-   *lb = templf;
-}
 
 void free_LablePosPair(LablePosPair* lpp)
 {

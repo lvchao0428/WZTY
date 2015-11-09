@@ -115,7 +115,7 @@ int scope_str_cmp(char* dest, char* from, int dest_beg)
 {
    int i = dest_beg, j = 0;
    int len = strlen(from);
-   while(dest[i] != '\0' && from[j])
+   while(dest[i] && from[j])
    {
 
 	  if(character_to_lower(dest[i]) != from[j])
@@ -423,7 +423,7 @@ int return_son_str_pos(char* father, char* son)
 int print_str(char* str, int beg, int end)
 {
    int i = beg;
-   while(beg != (beg+end))
+   while(beg <= end)
    {
 	  printf("%c", str[beg]);
 	  beg++;
