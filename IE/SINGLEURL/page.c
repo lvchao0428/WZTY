@@ -43,11 +43,12 @@ int is_discuz(LineBuf* pb)
    }
    strcat(temphead, beglb->str);
    //printf("head:%s fileno:%d\n", temphead, beglb->file_no);
+   //printf("test temphead:\n%s\n", temphead);
    if(!beglb)
    {
 	  return 0;
    }
-   if((mystrstr(temphead, "Discuz") != -1) || (mystrstr(temphead, "discuz") != -1))
+   if((mystrstr(temphead, "discuz") != -1))
    {
 	  return 1;
    }

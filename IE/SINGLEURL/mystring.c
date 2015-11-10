@@ -117,7 +117,6 @@ int scope_str_cmp(char* dest, char* from, int dest_beg)
    int len = strlen(from);
    while(dest[i] && from[j])
    {
-
 	  if(character_to_lower(dest[i]) != from[j])
 	  {
 		 break;

@@ -722,46 +722,40 @@ LableType check_lable(char* line)
 {//检查此行标签的可能内容，并返回可能的标签
    int i = 0;
    LableType lt = -1;
-   char lable[60];
-   int j = 0;
-   //printf("char 0 : %c\n", line[0]);
-   while(line[i] != '>' && line[i] != ' ')
-   {
-	  lable[j++] = line[i++];
-   }
-   //printf("read lable end\n");
-   lable[j] = '\0';
 
 //   printf("test check lable: %s\n", lable);
 //   printf("line:%s\n", line);
-   if(strcmp(lable, "<title") == 0)
+   if(mystrstr(line, "<title") != -1)
    {
 	  lt = TITLELABLE;
-//	  printf("title checked\n");
+	  printf("title checked\n");
+	//  printf("title:%s\n", line);
    }
-   //内容标签里面有可能包含的postmessage
-   else if((strcmp(lable, "<div") == 0) && mystrstr(line, "authi"))
+   //内容标签里面有可能包含的authi
+   else if((mystrstr(line, "<div") != -1) && mystrstr(line, "authi")!= -1)
    {
 	  lt = AUTHORLABLE;
 
-//	  printf("author checked\n");
+	  printf("author checked\n");
+	 // printf("author:%s\n", line);
    }
-   else if(mystrstr(line, "authorposton") == 1)
+   else if(mystrstr(line, "authorposton") != -1)
    {
 	  lt = TIMELABLE;
-//	  printf("time checked\n");
+	  printf("time checked\n");
+
+	//  printf("time:%s\n", line);
    }
-   
-   else if(mystrstr(line, "查看") && mystrstr(line, "回复"))
+   else if(mystrstr(line, "查看")!= -1 || mystrstr(line, "回复") != -1)
    {
 	  lt = REPLAYLABLE;
-//	  printf("replay checked\n");
+	  printf("replay checked\n");
    }
-   else if(((strcmp(lable, "<div") == 0) || (strcmp(lable, "<table") == 0)) && 
-		 ((mystrstr(line, "postmessage") == 1 || (mystrstr(line, "pid") == 1))))
+   else if((mystrstr(line, "<table") != -1) &&((mystrstr(line, "postmessage") != -1)))
    {//此个网页内容部分包含在talbe中，以后可以在这里扩展内容页可能存在的标签
 	  lt = CONTENTLABLE;
-//	  printf("content checked\n");
+	  printf("content checked\n");
+	  printf("content:%s\n", line);
    }
 
    return lt;
@@ -922,7 +916,9 @@ int deal_adver(char* tempstr, LablePosPair* lpp, LablePosPair* lastlpp[LASTLINKN
    {//检查标签间距
 	  if(p->lt == ENDLINKTYPE || p->lt == LINKTYPE)
 	  {
-		 if(p->next && p->next->lt != LINKTYPE && (p->next->left - p->right < 3))
+		 if(p->next && p->next->lt != LINKTYPE && (p->next->left - p->right < 3) && 
+			   ((p->lt == LINKTYPE && p->next->lt != ENDLINKTYPE) ||
+			   (p->lt == ENDLINKTYPE && p->next->lt != LINKTYPE)))
 		 {
 			q = p->next;
 			p->right = q->right;
@@ -960,7 +956,7 @@ int deal_adver(char* tempstr, LablePosPair* lpp, LablePosPair* lastlpp[LASTLINKN
 		 beglpp = p;
 	  }
 //	  printf("lable:%d")
-	  if(p->next->lt != LINKTYPE)
+	  if(p->next && p->next->lt != LINKTYPE)
 	  {
 		 p = p->next;
 		 continue;
@@ -968,25 +964,33 @@ int deal_adver(char* tempstr, LablePosPair* lpp, LablePosPair* lastlpp[LASTLINKN
 	  if(p->next->lt == LINKTYPE)
 	  {//如果是连续广告，则找到结束的位置,连续广告需要考虑结束标签和下一个网页开始标签是否间距为0
 		 int end_flag = 0;
+		 count = 0;
 		 while(end_flag == 0 && p->next)
 		 {
-			if(p->lt == LINKTYPE || p->lt == ENDLINKTYPE)
+			if(p->lt == ENDLINKTYPE)
 			{
 			   if(p->lt == ENDLINKTYPE && p->next->lt == LINKTYPE)
 			   {
 				  int gap = p->next->left - p->right;
-				  if(gap != 0)
+				  if(gap != 1)
 				  {
 					 break;
 				  }
 			   }
 			   count++;
-			   endlpp = p;
 			   p = p->next;
-			}
-			else
-			{
-			   end_flag = 1;
+			   endlpp = p;
+			   if(p->next)
+			   {
+				  p = p->next;
+				  endlpp = p;
+			   }
+			   if(p->lt != ENDLINKTYPE)
+			   {
+				  endlpp = p;
+				  end_flag = 1;
+				  break;
+			   }
 			}
 		 }
 	  }
@@ -1007,8 +1011,54 @@ int deal_adver(char* tempstr, LablePosPair* lpp, LablePosPair* lastlpp[LASTLINKN
 	  test_scope_lpp(beglpp, endlpp, tempstr);
 	  printf("end commercial\n");
    }
-   //
+
+   //开始标签找到之前没有标点的区域
+   LablePosPair* tempbeg = beglpp;
+   int begflag = 0;
    
+   while(begflag == 0 && tempbeg != lpp->next)
+   {
+	  
+	  tempbeg = tempbeg->before;	  
+	  if(scope_str_cmp(tempstr, "<div", tempbeg->left) == 1)
+	  {
+		 begflag = 1;
+		 break;
+	  }
+   }
+   //把广告链接合并成一个pair
+   printf("test full commercial\n");
+   test_scope_lpp(tempbeg, endlpp, tempstr); 
+   printf("end full commercial\n");
+   
+   while(tempbeg && tempbeg != endlpp)
+   {
+	  if(tempbeg->next != endlpp)
+	  {
+		 q = tempbeg->next;
+		 tempbeg->right = q->right;
+		 tempbeg->next = tempbeg->next->next;
+		 free(q);
+	  }
+	  else
+	  {
+		 q = tempbeg->next;
+		 //如果广告结束标签不在末尾
+		 if(endlpp->next)
+		 {
+			tempbeg->next = tempbeg->next->next;
+			tempbeg->right = endlpp->right;
+		 }
+		 else
+		 {
+			tempbeg->next = NULL;
+			tempbeg->right = endlpp->right;
+		 }
+		 free(q);
+		 break;
+	  }
+   }
+
 }
 
 /*
@@ -1101,13 +1151,13 @@ int extract_content_with_punct(LineBuf** lb, char* line)
    }
    find_all_greater_lower(tempstr, lpp);
    
-   test_lpp(lpp, tempstr);
+   //test_lpp(lpp, tempstr);
 
    // int comNum = find_comma_num_out(tempstr);
    LablePosPair* lastlpp[LASTLINKNUM];
    //这里提取的区域仍然较大，需要把广告链接等去掉
-   deal_adver(tempstr, lpp, lastlpp);
-   test_lpp(lpp, tempstr);
+//   deal_adver(tempstr, lpp, lastlpp);
+//   test_lpp(lpp, tempstr);
    dispos_son_lable(tempstr, lpp);
     
    //
