@@ -96,6 +96,7 @@ int mystrcpy(char* dest, char* from, int begPos, int endPos)
    {
 	  dest[j++] = from[i++];
    }
+   
    dest[j] = '\0';
 }
 
@@ -112,7 +113,7 @@ int mystrcpy_with_point(char* dest, char* from, char* begpos,char* endpos)//使�
 }
 
 int scope_str_cmp(char* dest, char* from, int dest_beg)
-{
+{//从dest的dest_beg开始如果接下来的几个字符和from完全一致，则认为包含
    int i = dest_beg, j = 0;
    int len = strlen(from);
    while(dest[i] && from[j])
@@ -386,6 +387,64 @@ int anno_beg_end_times_fill(char* str, int* begtimes, int* endtimes)
    *endtimes = endt;
 }
 
+
+int lable_beg_end_times_fill(char* str, char* beglable, char* endlable, int* begtimes, int* endtimes)
+{
+   int i = 0;
+   int begt = 0, endt = 0;
+   int beglableCount = 0, endlableCount = 0;
+   int len = strlen(str);
+   int nolable = 0;
+   begt = mystrstr(str, beglable);
+   endt = mystrstr(str, endlable);
+   if(begt == endt)
+   {
+	  *begtimes = begt;
+	  *endtimes = endt;
+   }
+   else
+   {
+	  while(begt < len && endt < len)
+	  {
+		 int cur_pos = begt >= endt ? begt : endt;
+		 int temp =  mystrstr(str + cur_pos, beglable);
+		 begt = cur_pos + temp;
+		 if(temp != -1)
+		 {
+			nolable = 0;
+			beglableCount++;
+			temp = return_son_str_pos(str + begt, endlable);
+			endt = begt + temp; 
+
+			if(temp != -1)
+			{
+			   endlableCount++;
+			   nolable = 0;
+			}
+			else
+			{
+			   nolable++;
+			}
+
+		 }
+		 else
+		 {
+			nolable++;
+		 }
+
+		
+		 if(nolable == 2)
+		 {
+			break;
+		 }
+	  }
+
+   }
+
+   *begtimes = begt;
+   *endtimes = endt;
+}
+
 int return_son_str_pos(char* father, char* son)
 {//返回第一次出现son字符串的结束位置
    int i = 0;
@@ -396,7 +455,7 @@ int return_son_str_pos(char* father, char* son)
 	  {
 		 while(son[j] != '\0')
 		 {
-			if(father[i+j] == son[j])
+			if(character_to_lower(father[i+j]) == son[j])
 			{
 			   j++;
 			}

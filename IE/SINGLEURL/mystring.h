@@ -36,7 +36,11 @@ char character_to_lower(char c);	//把字母返回小写
 
 int find_str_times(char* str, char* word);		//寻找后面字符串在前面字符串中出现的次数
 
+//正确计算注释标记的开始和结束标签数量
 int anno_beg_end_times_fill(char* str, int* begtimes, int* endtimes);
+
+
+int lable_beg_end_times_fill(char* str, char* beglable, char* endlable, int* begtimes, int* endtimes);
 
 int return_son_str_pos(char* father, char* son);	//返回第一次出现son字符串的结束位置
 

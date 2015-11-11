@@ -167,20 +167,7 @@ int main(int argc, char* argv[])
    
   // illegal_part_deal(lb);
    //count illegal lable
-   int annobegNum = 0, annoendNum = 0, scriptbegNum = 0, scriptendNum = 0,\
-	   stylebegNum = 0, styleendNum = 0;
-  
-   count_illegal_lable(lb,&annobegNum, &annoendNum,\
-		 &scriptbegNum, &scriptendNum,
-		 &stylebegNum, &styleendNum);
-   
-   printf("&annobegNum:%d, &annoendNum:%d,\
-		 &scriptbegNum:%d, &scriptendNum:%d,\
-		 &stylebegNum:%d, &styleendNum:%d\n",\
-		 annobegNum, annoendNum,\
-		 scriptbegNum, scriptendNum,\
-		 stylebegNum, styleendNum);
-
+   test_illegal_lable(lb);
    //file_buf_write(lb, "test_file.html");
    // discuz_fill_the_page(lb, &page);
    int is_discuz_flag = is_discuz(lb);
@@ -211,10 +198,18 @@ int main(int argc, char* argv[])
    }
    else
    {
+
+//	  annotation_part_handle(lb);
+//	  printf("wipe anno end\n");
 	  illegal_part_deal(lb);
+	  printf("end once illgel wipe\n");
+	  test_illegal_lable(lb);
 	  illegal_part_deal(lb);
+	  printf("end twice illgel wipe\n");
 	  //illegal_part_deal(lb);
    //illegal_part_deal(lb);
+	 
+	  test_illegal_lable(lb);
 	  no_discuz_fill_the_page(lb, &page);
 	  printf("title:%s\n", page.title);
 	  printf("content:%s\n", page.content);

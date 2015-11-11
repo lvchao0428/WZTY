@@ -13,8 +13,11 @@
 int discuz_fill_the_page(LineBuf* pb, Page* page)
 {//提取论坛内容
    
+   int has_post = has_postmessage(pb);
+   printf("has_post:%d\n", has_post);
    char* line = NULL;
    LineBuf* p = pb->next;
+   
    while(p != NULL)
    {
 	  int i = 0;
@@ -43,7 +46,7 @@ int discuz_fill_the_page(LineBuf* pb, Page* page)
 		 case CONTENTLABLE:
 			if(page->content_filled != 1)
 			{//如果可能是内容选项，而且还没有被填充过，则当内容项处理时候的内容
-			   deal_content(&p, page);
+			   deal_content(&p, page, has_post);
 			}
 			printf("content type ,%s\n", line);
 			break;
@@ -121,155 +124,99 @@ int deal_clickAndreplay(LineBuf** lf, Page* page)
    if((mystrstr(endlf->str, "查看") != -1) && (mystrstr(endlf->str, "回复") != -1))
    {  //查看和回复在同一行
 	  //两个数值一般都在span标签中间，找到两块span标签即可
+	  int check_beg_pos, check_end_pos, replay_beg_pos, replay_end_pos;
+
+	  check_beg_pos = mystrstr(endlf->str, "查看");	//先找到查看的位置，然后往后找span标签的位置
+	  check_beg_pos += mystrstr(endlf->str + check_beg_pos, "<span");	//找到后面查看数的span开始标签位置
+	  check_end_pos = check_beg_pos + return_son_str_pos(endlf->str + check_beg_pos, "</span>");	//找到查看span结束标签的开始位置
 	  
+	  replay_beg_pos = mystrstr(endlf->str, "回复");
+	  replay_beg_pos += mystrstr(endlf->str + replay_beg_pos, "<span");
+	  replay_end_pos = replay_beg_pos + return_son_str_pos(endlf->str + replay_beg_pos, "</span>");
 
-   }
 
-   if((click_pos = mystrstr(endlf->str, "查看")) != -1)
-   {
-	  line = endlf->str;
+	  char temp_check_str[100] = {0};
+	  char temp_replay_str[100] = {0};
+	  mystrcpy(temp_check_str, endlf->str, check_beg_pos, check_end_pos);
+	  mystrcpy(temp_replay_str, endlf->str, replay_beg_pos, replay_end_pos);
+	 
+	  printf("checkbegpos:%d, checkendpos:%d\n", check_beg_pos, check_end_pos);
+	  printf("replaybegpos:%d, replayendpos:%d\n", replay_beg_pos, replay_end_pos);
+	  printf("test click:%s\n", temp_check_str);
+	  printf("test replay_str:%s\n", temp_replay_str);
+	  printf("double checked\n"); 
+	  //提取点击的次数
+	  LablePosPair* check_lpp = (LablePosPair*)malloc(sizeof(LablePosPair));
+	  check_lpp->next = NULL;
+	  find_all_greater_lower(temp_check_str, check_lpp);
+	  test_lpp(check_lpp, temp_check_str);
+	  dispos_son_lable(temp_check_str, check_lpp);
+	  
+	  //提取回复的次数
+	  LablePosPair* replay_lpp = (LablePosPair*)malloc(sizeof(LablePosPair));
+	  replay_lpp->next = NULL;
+	  find_all_greater_lower(temp_replay_str, replay_lpp);
+	  test_lpp(replay_lpp, temp_replay_str);
+	  dispos_son_lable(temp_replay_str, replay_lpp);
 
-	  while(*line++ != '>');
+	  page->click_count = (char*)malloc(sizeof(char)*(strlen(temp_check_str) + 1));
+	  strcpy(page->click_count, temp_check_str);
 
-	  LablePosPair* lpp = (LablePosPair*)malloc(sizeof(LablePosPair));
-	  lpp->next = NULL;
-	  find_all_greater_lower(line, lpp);
-	  page->click_count = (char*)malloc(sizeof(char)*50);
-	  strcpy(page->click_count, line);
-	  dispos_son_lable(page->click_count, lpp);
-	  page->replay_filled = 1;
-   }
-   
-   if((replay_pos = mystrstr(endlf->str, "回复")) != -1)
-   {
-	  line = endlf->str;
+	  page->replay_count = (char*)malloc(sizeof(char*)*20);
+	  strcpy(page->replay_count, temp_replay_str);
 
-	  while(*line++ != '>');
-
-	  LablePosPair* lpp = (LablePosPair*)malloc(sizeof(LablePosPair));
-	  lpp->next = NULL;
-	  find_all_greater_lower(line, lpp);
-	  page->replay_count = (char*)malloc(sizeof(char)*50);
-	  strcpy(page->replay_count, line);
-	  dispos_son_lable(page->replay_count, lpp);
 	  page->replay_filled = 2;
    }
-   
-   templf = templf->next;
+   else
+   //如果是查看和回复在多行的情况下的处理方式
+   {
+	  if(mystrstr(endlf->str, "查看") != -1)
+	  {//处理查看和回复不在同一行的情况
+		 int click_beg_pos, click_end_pos;
+		 printf("single chakan.................******...........\n");
+		 click_beg_pos = mystrstr(endlf->str, "查看");
+		 click_beg_pos += mystrstr(endlf->str, "<span");
+		 click_end_pos = click_beg_pos + return_son_str_pos(endlf->str, "</span>");
+
+		 char temp_click_str[100] = {0};
+		 mystrcpy(temp_click_str, endlf->str, click_beg_pos, click_end_pos);
+
+		 LablePosPair* click_lpp = (LablePosPair*)malloc(sizeof(LablePosPair));
+		 click_lpp->next = NULL;
+		 find_all_greater_lower(temp_click_str, click_lpp);
+		 dispos_son_lable(temp_click_str, click_lpp);
+
+		 page->click_count = (char*)malloc(sizeof(char)*(strlen(temp_click_str) + 1));
+		 strcpy(page->click_count, temp_click_str);
+		 page->replay_filled = 1;
+	  }
+	  
+	  if((replay_pos = mystrstr(endlf->str, "回复")) != -1)
+	  {
+		 int replay_beg_pos, replay_end_pos;
+		 printf("single huifu**************............*************\n");
+		 replay_beg_pos = mystrstr(endlf->str, "回复");
+		 replay_beg_pos += mystrstr(endlf->str, "<span");
+		 replay_end_pos = replay_beg_pos + return_son_str_pos(endlf->str, "</span>");
+
+		 char temp_replay_str[100] = {0};
+		 mystrcpy(temp_replay_str, endlf->str, replay_beg_pos, replay_end_pos);
+
+		 LablePosPair* replay_lpp = (LablePosPair*)malloc(sizeof(LablePosPair));
+		 replay_lpp->next = NULL;
+		 find_all_greater_lower(temp_replay_str, replay_lpp);
+		 dispos_son_lable(temp_replay_str, replay_lpp);
+
+		 page->replay_count = (char*)malloc(sizeof(char)*(strlen(temp_replay_str)+1));
+		 strcpy(page->replay_count, temp_replay_str);
+		 page->replay_filled = 2;
+	  }
+
+   }
 
    *lf = templf;
 
-/*
 
-   do{
-	  if(mystrstr(endlf->str, "</span>") > 0)
-	  {
-		 endlf = endlf->next;
-		 break;
-	  }
-	  endlf = endlf->next;
-   }while(mystrstr(endlf->str, "</span>") > 0);
-   
-   //printf("begin non\n");
-   do{
-	  mycatNoN(tempstr, templf->str);
-	  templf = templf->next;
-   }while(templf != NULL && templf != endlf);
-
-   
-   //printf("begin despace\n");
-   //despace_betw_more_less(tempstr);
-   //printf("after despace str:%s\n", tempstr);
-   //find the first place after "查看" 's '><'
-   int clickbegPos = 0, clickendPos = 0;
-   int replaybegPos = 0, replayendPos = 0;
-   clickbegPos = return_son_str_pos(tempstr, "查看");
-   //printf("return son pos:%d\n", clickbegPos);
-   //find clickbegPos
-   while(tempstr[clickbegPos] != '\0')
-   {
-	  if(tempstr[clickbegPos] == '>')
-	  {
-		 if(tempstr[clickbegPos + 1] == '>')
-		 {
-			clickbegPos++;
-		 }
-		 else if(tempstr[clickbegPos+1] == ' ' && tempstr[clickbegPos+2] == '<')
-		 {
-			clickbegPos+=2;
-		 }
-		 else if(tempstr[clickbegPos+1] != ' ' && tempstr[clickbegPos+2] != '<' ){
-			clickbegPos++;
-			break;
-		 }
-	  }
-	  clickbegPos++;
-   }
- //  printf("begin pos:%d\n", clickbegPos);
-   //print_str(tempstr, clickbegPos, clickendPos+5);
-
-   //find clickendPos
-   clickendPos = clickbegPos;
-   while(tempstr[clickendPos] != '\0')
-   {
-//  printf("bb pos:%d\n", clickendPos);
-	  if(tempstr[clickendPos] == '<')
-	  {
-		 break;
-	  }
-	  clickendPos++;
-   }
-//   printf("clickend pos:%d\n", clickendPos);
-   //find replaybegPos
-   page->click_count = (char*)malloc(sizeof(char)*20);
-   mystrcpy(page->click_count, tempstr, clickbegPos, clickendPos);
-   replaybegPos = return_son_str_pos(tempstr, "回复");
-   //printf("replaybegPos:%d,  str:%s\n", replaybegPos,tempstr);
-   //printf("len:%d\n", strlen(tempstr));
-   while(tempstr[replaybegPos] != '\0')
-   {
-	  if(tempstr[replaybegPos] == '>')
-	  {
-		 if(tempstr[replaybegPos + 1] == '>')
-		 {
-			replaybegPos++;
-		 }
-		 else if(tempstr[replaybegPos+1] == '<')
-		 {
-			replaybegPos++;
-		 }
-		 else if(tempstr[replaybegPos+1] == ' ' && tempstr[replaybegPos+2] == '<')
-		 {
-			replaybegPos+=2;
-		 }
-		 else if(tempstr[replaybegPos+1] != ' '){
-			replaybegPos++;
-			break;
-		 }
-	  }
-	  replaybegPos++;
-   }
- //  printf("replay beg:%d\n", replaybegPos);
-   //find replay end 
-   replayendPos = replaybegPos;
-   while(tempstr[replayendPos] != '\0')
-   {
-	  if(tempstr[replayendPos] == '<')
-	  {
-		 break;
-	  }
-	  else
-	  {
-		 replayendPos++;
-	  }
-   }
- //  printf("replay end pos:%d\n", replayendPos);
-   page->replay_count = (char*)malloc(sizeof(char)*10);
-   mystrcpy(page->replay_count, tempstr, replaybegPos, replayendPos);
-   page->replay_filled = 1;
-   return 1;
-
-   */
 }
 
 //提取名字
@@ -314,7 +261,7 @@ int deal_author(LineBuf** lf, Page* page)
 
 
 //提取内容
-int deal_content(LineBuf** lf, Page* page )
+int deal_content(LineBuf** lf, Page* page, int has_post)
 {
    LineBuf* templf = *lf; 
    //假设网页都是合理的网页，则找到table标签的结束标签
@@ -324,72 +271,72 @@ int deal_content(LineBuf** lf, Page* page )
    char tempstr[100000];
    tempstr[0] = '\0';
    LineBuf* endlf = templf;
-   
-   while(endlf != NULL && (mystrstr(endlf->str, "</table>") == -1))
+     //把table闭合标签里面的内容存起来再分析
+	  //内容提取的要素是，table标签里面的内容，有嵌套标签包含的都去掉
+	  //这里代表discuz的正文抽取，如果是有postmessage就不检查pid，如果没有
+	  //则通过以下方案搜索
+	  //1.先找到pid和下面几行如果没有正文长度则跳过
+	  //2.如果有正文长度，返回起始指针，然后向下找到table标签的结尾处
+
+   //分为postmessage和pid两种
+   if(mystrstr(endlf->str, "\"postmessage") != -1 && has_post == 1)
    {
-	 // nlen += strlen(endlf->str);
-	 // mycatNoN(tempstr, endlf->str);
+	  while(endlf != NULL && (mystrstr(endlf->str, "</table>") == -1))
+	  {
+		 strcat(tempstr, endlf->str);
+		 endlf = endlf->next;	  
+	  }
 	  strcat(tempstr, endlf->str);
-	  endlf = endlf->next;	  
+	  printf("whole str is:\n", tempstr);
+	  
+	  LablePosPair* lpp = (LablePosPair*)malloc(sizeof(LablePosPair));
+	  lpp->next = NULL;
+	  find_all_greater_lower(tempstr, lpp);
+	  dispos_son_lable(tempstr, lpp);
+
+	  page->content = (char*)malloc(sizeof(char)*(strlen(tempstr) + 1));
+	  //mystrcpy(page->content, tempstr, begPos, endPos);
+	  strcpy(page->content, tempstr);
+	  
+	  //把除去标签的部分都赋值给内容项
+
+	  endlf = endlf->next;
+	  page->content_filled = 1;
+	  *lf = endlf->next;
    }
-   strcat(tempstr, endlf->str);
-   printf("whole str is:\n", tempstr);
-   //nlen += strlen(endlf->str);
-   
-   //如果table标签在一行里面出现了超过2则为段内容或无内容标签，根据书写习惯判定为非内容字段
-   /*
-   if(find_str_times(tempstr, "table") > 2)
+   else if(mystrstr(endlf->str, "\"pid") != -1 && has_post == -1)
    {
-	  return 0;
+	  //查找下面10行。然后检查正文长度，和标点
+	  int count = 10;
+
+	  while(count > 0)
+	  {
+		 strcat(tempstr, endlf->str);
+		 endlf = endlf->next;
+		 count--;
+	  }
+	  int word_len = word_length_get(tempstr);
+	  if(word_len > 10)
+	  {
+		 tempstr[0] = '\0';
+		 endlf = templf;
+		 while(mystrstr(endlf->str, "</table>") == -1)
+		 {
+			strcat(tempstr, endlf->str);
+			endlf = endlf->next;
+		 }
+		 strcat(tempstr, endlf->str); 
+		 LablePosPair* content_lpp = (LablePosPair*)malloc(sizeof(LablePosPair));
+		 content_lpp->next = NULL;
+		 find_all_greater_lower(tempstr, content_lpp);
+		 dispos_son_lable(tempstr, content_lpp);
+		 page->content = (char*)malloc(sizeof(char)*(strlen(tempstr) + 1));
+		 strcpy(page->content, tempstr);
+
+		 page->content_filled = 1;
+	  }
+	  *lf = endlf->next;
    }
-*/
- //  printf("tempcontentline: %s\n", tempstr);
-
-   //把table闭合标签里面的内容存起来再分析
-    //内容提取的要素是，table标签里面的内容，有嵌套标签包含的都去掉
-  /*
-   int begPos = 0, endPos = nlen+1;
-	
-	//find begin table end
-   while(tempstr[begPos] != '\0' && tempstr[begPos++] != '>'); 
-   //find end table begin
-   while(endPos > 0 && tempstr[endPos] != '<') endPos--;
-   //dispose son lable
-*/
-   LablePosPair* lpp = (LablePosPair*)malloc(sizeof(LablePosPair));
-   lpp->next = NULL;
-   find_all_greater_lower(tempstr, lpp);
-   dispos_son_lable(tempstr, lpp);
-
-   page->content = (char*)malloc(sizeof(char)*(strlen(tempstr) + 1));
-   //mystrcpy(page->content, tempstr, begPos, endPos);
-   strcpy(page->content, tempstr);
-   //把嵌套子标签去掉
-   //LablePosPair* greaterLpp = (LablePosPair*)malloc(sizeof(LablePosPair));
-   //LablePosPair* wordLpp = (LablePosPair*)malloc(sizeof(LablePosPair));
-   //printf("begin check out content lable:\n\n\n\n\n\n\n"); 
-   //printf("content raw:\n%s\n", page->content);
-   //find_all_greater_lower(page->content, greaterLpp);
-   //out_content_scope(page->content, wordLpp); 
-   
-  // test_lpp(greaterLpp);
-
-  // test_lpp(wordLpp);
-/*
-   if(is_word_longer_than_lable(page->content) == 1)
-   {
-
-   }
-   int comma_num = find_comma_num_out(page->content);
-*/
-  // printf("comma_num:%d\n", comma_num);
-   //把除去标签的部分都赋值给内容项
-   //dispos_son_lable(page->content, greaterLpp);   
-   //
-   //copy_scope_str_to_str(page->content, lpp);
-
-   endlf = endlf->next;
-   page->content_filled = 1;
 
    return 1;
 }
@@ -428,3 +375,22 @@ int deal_title(LineBuf** lf, Page* page)
    return 1;
 }
 
+int has_postmessage(LineBuf* lb)
+{
+   LineBuf* templb = lb->next;
+   int has_post = -1;
+   
+   while(templb)
+   {
+	  if(mystrstr(templb->str, "<table") != -1)
+	  {
+		 if(mystrstr(templb->str, "\"postmessage") != -1)
+		 {
+			has_post = 1;
+		 }
+	  }
+	  templb = templb->next;
+   }
+   
+   return has_post;
+}

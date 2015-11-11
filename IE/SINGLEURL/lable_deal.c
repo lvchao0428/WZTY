@@ -59,12 +59,18 @@ void count_illegal_lable(LineBuf* lb,
 	  {
 		 *stylebegNum += find_str_times(p->str, "<style");
 		 *styleendNum += find_str_times(p->str, "</style>");
+//		 lable_beg_end_times_fill(p->str, "<")
 	  }
 	  if(mystrstri(p->str, "<script") || mystrstri(p->str, "</script>"))
 	  {
-		 *scriptbegNum += find_str_times(p->str, "<script");
-		 *scriptendNum += find_str_times(p->str, "</script>");
-		// printf("line:%d\t, beglb:%d, endlb:%d\n", p->line_no, *scriptbegNum, *scriptendNum);
+		 int t_b = 0, t_e = 0;
+		// *scriptbegNum += find_str_times(p->str, "<script");
+		// *scriptendNum += find_str_times(p->str, "</script>");
+		 printf("line:%d\t, beglb:%d, endlb:%d\n", p->line_no, *scriptbegNum, *scriptendNum);
+		 printf("str:%s\n", p->str);
+		 lable_beg_end_times_fill(p->str, "<script", "</script>", &t_b, &t_e);
+		 *scriptbegNum += t_b;
+		 *scriptendNum += t_e;
 	  }
 	  p = p->next;
    }
@@ -354,12 +360,15 @@ void illegal_lable_wipe(LineBuf** lb, char* beglable, char* endlable)
 
 		 if(endlb == NULL)
 		 {
-		//	printf("beglablenum:%d, endlableNum:%d\n", begLableNum, endLableNum);
-//			LineBuf* ttlb = temptemplb->next;
-		//	printf("temptemptempstr:%s\nlieno:%d\n", temptemplb->str, temptemplb->line_no);
-		//	printf("NULLNULLNULL****************\n");
+			printf("beglablenum:%d, endlableNum:%d\n", begLableNum, endLableNum);
+			LineBuf* ttlb = temptemplb->next;
+			printf("temptemptempstr:%s\nlieno:%d\n", temptemplb->str, temptemplb->line_no);
+			printf("NULLNULLNULL****************\n");
 		 }
-		 buffLen += strlen(endlb->str); 
+		 else
+		 {
+			buffLen += strlen(endlb->str); 
+		 }
 		 strcpy(tempstr, temptemplb->str);		//把第一个节点先赋值给tempstr，等复制完后几个节点一并付给lb->str
 		 //这时候需要把temptemplb->next 一直到endlb的str付给temptemplb，并且把多余节点删掉
 		 LineBuf* q;
@@ -434,161 +443,37 @@ void illegal_lable_wipe(LineBuf** lb, char* beglable, char* endlable)
 
 		 
 		 *lb = (temptemplb->before->before);
+
 		 if(endlb == NULL)
 		 {
 			*lb = NULL;
 		 }
+		 
 	  }
    }
   
 }
 
 //标记注释区域
-void annotation_part_handle(LineBuf** lb)
+void annotation_part_handle(LineBuf* lb)
 {
-   LablePosPair* templpp = (LablePosPair*)malloc(sizeof(LablePosPair));
-   templpp->next = NULL;
-   LablePosPair* p = templpp;
-   LineBuf* beglb, *endlb, *templb;
-   beglb = endlb = *lb;
-   int done = 0;	//如果此次寻找注释区域已经完全则视为处理完成
-   
-   if(endlb)
+   LineBuf* beglb = lb->next;
+
+   //删除注释信息
+   while(beglb)
    {
-	  int begLableNum, endLableNum;
-	  
-	  begLableNum = find_str_times(endlb->str, "<!--");
-	  endLableNum = find_str_times(endlb->str, "-->");
-	  
-	  //printf("beglableNum:%d\t", begLableNum);
-	  int begLableCount = 0;
-	  //printf("endlableNum:%d\n", endLableNum);
-	  if(begLableNum == endLableNum)
-	  {//此句话有偶数个注释标签，所以此行的注释不会延伸到下一行，把
-		 //此行注释处理后把剩下的信息赋值回去。
-		 int i = 0;
-		 char* c = endlb->str;
-	//	 printf("begin start lable getting\n");
-		// printf("len:%d\n", strlen(c));
-		 int len = strlen(c);
-		 for(i = 0; i < len && begLableCount < begLableNum; ++i)
-		 {//找到所有的"<!--"
-			
-			if(c[i] == '<' && c[i+1] == '!')
-			{
-		//	   printf("%c\n", c[i]);
-			   LablePosPair* q = (LablePosPair*)malloc(sizeof(LablePosPair));
-			   q->next = NULL;
-			   q->left = i;
-			   p->next = q;
-			   p = p->next;
-			   begLableCount++;
-			}
-
-		 }
-		 p = templpp->next;
-		 
-		 i = 0;
-		 //找到"-->"
-		 while(p && c[i+1] && c[i])
-		 {
-			i = p->left;
-			while(p && c[i+1] && c[i])
-			{
-			   if(c[i] == '-' && c[i+1] == '>')
-			   {
-				  p->right = i+1;
-				  break;
-			   }
-			   i++;
-			}
-			p = p->next;
-		 }
-
-		 //test lpp
-	//	 printf("test lpp\n");
-	//	 test_lpp(templpp);
-
-		 //生成剩下的内容范围
-		 p = templpp->next;
-		 if(p->next == NULL)
-		 {
-			p->left = p->right+1;
-			p->right = strlen(endlb->str);
-		 }
-		 
-		 while(p && p->next)
-		 {
-			p->left = p->right+1;
-			p->right = p->next->left-1;
-			if(p->next->next == NULL)
-			{
-			   LablePosPair* temp = p->next;
-			   p->next = NULL;
-			   free(temp);
-			}
-			p = p->next;
-		 }
-		 
-		 p = templpp->next;
-		 c = endlb->str;
-		 //单行注释位置已经被标记完毕，把剩下内容赋值给原字符串
-		 int j = 0;
-		 i = p->left;
-		 while(p && c[j])
-		 {
-			i = p->left;
-			while(i <= p->right)
-			{
-			   c[j++] = c[i++];
-			}
-			p = p->next;
-		 }
-		 c[j] = '\0';
-		 
+	  if((mystrstr(beglb->str, "<!--")== -1))
+	  {
+		 beglb = beglb->next;
+		 continue;
 	  }
-	  else if(begLableNum > endLableNum)
-	  {//如果是多行注释则合并成一行，下一回合处理
-		// printf("endlb->str:%s\n", endlb->str);
-		 LineBuf* temptemplb = endlb;	//保存开始的指针，先计算长度，然后第二遍才分配空间
-		 int buffLen = 0;
-		 LineBuf* needToBeDeleteLb = temptemplb->next;
-		 char tempstr[10000];
-		 strcpy(tempstr, endlb->str);
-		 while(endlb && (mystrstr(endlb->str, "-->") == -1))
-		 {
-			buffLen += strlen(endlb->str);
-			endlb = endlb->next;
-		 }
-		 buffLen += strlen(endlb->str);
-		 temptemplb->str = (char*)realloc(temptemplb->str, sizeof(char)*(buffLen+1));
-		 //这时候需要把temptemplb->next 一直到endlb的str付给temptemplb，并且把多余节点删掉
-		 LineBuf* q;
-		 
-		 while(needToBeDeleteLb != endlb)
-		 {
-//			printf("need lb:%s\n", needToBeDeleteLb->str);
-			strcat(tempstr, needToBeDeleteLb->str);
-			q = needToBeDeleteLb;
-			temptemplb->next = needToBeDeleteLb->next;
-			needToBeDeleteLb = needToBeDeleteLb->next;
-			free(q);
-		 }
-		 q = endlb;
-		 strcat(tempstr, endlb->str);
-		// free(temptemplb->str);
-		 //printf("len:%d\n", buffLen);
-		 temptemplb->str = (char*)malloc(sizeof(char)*(buffLen+1));
-		 temptemplb->next = endlb->next;
-		 strcpy(temptemplb->str, tempstr);
-		 
-		 //printf("mul_len:%d %s\n", buffLen, temptemplb->str);
-		 *lb = temptemplb->before->before;
+	  else if(mystrstr(beglb->str, "<!--") != -1)
+	  {//优先清除注释信息
+		 illegal_lable_wipe(&beglb, "<!--", "-->");
 	  }
-   }
-   
+	  beglb = beglb->next;
+   }   
 }
-
 
 LablePosPair* out_content_scope(char* line, LablePosPair* lpp)
 {//把字符串中内容项的范围存储到lpp里面，也即除去标签之外的内容部分的下标范围
@@ -751,7 +636,8 @@ LableType check_lable(char* line)
 	  lt = REPLAYLABLE;
 	  printf("replay checked\n");
    }
-   else if((mystrstr(line, "<table") != -1) &&((mystrstr(line, "postmessage") != -1)))
+   else if((mystrstr(line, "<table") != -1) &&((mystrstr(line, "postmessage") != -1)||
+			(mystrstr(line, "\"pid") != -1)))
    {//此个网页内容部分包含在talbe中，以后可以在这里扩展内容页可能存在的标签
 	  lt = CONTENTLABLE;
 	  printf("content checked\n");

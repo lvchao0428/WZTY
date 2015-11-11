@@ -12,9 +12,10 @@ void count_illegal_lable(LineBuf* lb,
 
 void illegal_part_deal(LineBuf* lb);		//非法部分处理
 
+
 void illegal_lable_wipe(LineBuf** lb, char* beglable, char* endlable);	//删除被被该字符串包裹的部分
 
-void annotation_part_handle(LineBuf** lb);	//处理注释部分
+void annotation_part_handle(LineBuf* lb);	//处理注释部分
 
 LablePosPair* out_content_scope(char* line, LablePosPair* lpp);		//生成内容的下标范围
 

@@ -14,9 +14,13 @@ int deal_clickAndreplay(LineBuf** lf, Page* page);	//从行存储结构中读取
 
 int deal_author(LineBuf** lf, Page* page);			//从行存储结构中读取作者信息
 
-int deal_content(LineBuf** lf, Page* page);			//从行存储结构中读取内容信息
+int deal_discuz_content(LineBuf** lf, Page* page, int has_post);			//从行存储结构中读取内容信息
+
+
 
 void dispos_son_lable(char* str, LablePosPair* lpp);		//去掉discuz内容子标签
 
+//包含postmessage直接存取
+int has_postmessage(LineBuf* pb);
 
 #endif

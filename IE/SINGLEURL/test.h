@@ -14,4 +14,6 @@ void test_scope_lpp(LablePosPair* beglpp, LablePosPair* endlpp, char* str);
 
 void count_comma(LineBuf* lb);
 
+int test_illegal_lable(LineBuf* lb);
+
 #endif
