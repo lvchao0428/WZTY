@@ -13,6 +13,8 @@ const char* mystrstri(const char* str, const char* subStr);	//不区分大小写
 
 int mystrstr(char* father, char* son);			//测试前面字符串里面是否包含后面的字符串
 
+int mylableStrstr(char* father, char* son);	//专门用来寻找标签的字符串查找函数，区分几种特殊标签的混淆
+
 int mystrcpy(char* dest, char* from, int begPos, int endPos);	//把from字符串的下表范围里面的字符串拷贝到前面字符串
 
 int mystrcpy_with_point(char* dest, char* from, char* begpos,char* endpos);//使用指针标示位置的字符串复制函数

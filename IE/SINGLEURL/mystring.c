@@ -88,6 +88,52 @@ int mystrstr(char* father, char* son)
    }
 }
 
+int mylableStrstr(char* father, char* son)	//专门用来寻找标签的字符串查找函数，区分几种特殊标签的混淆
+{
+   int i = 0;
+   int pos = 0;
+
+   //判断是否是<script和<!--
+   int is_script = mystrcmp(son, "<script");
+   int is_anno = mystrcmp(son, "<!--");
+   //
+   //
+   while(father[i] != '\0')
+   {
+	  int j = 0;
+	  if(character_to_lower(father[i]) == son[j])
+	  {
+		 if((i > 0 && father[i-1] == '\'' && father[i+1] != '/') || 
+			   (is_script && i > 0 && (father[i-1] == '"' || father[i-1] == '\'' || father[i-1] == '\\')))
+		 {
+			i++;
+			continue;
+		 }
+
+		 pos = i;
+		 while(son[j] != '\0')
+		 {
+			if(character_to_lower(father[i+j]) != son[j])
+			{
+			   break;
+			}
+			else
+			{
+			   j++;
+			}
+		 }
+		 if(son[j] == '\0')
+		 {
+			return pos;
+		 }
+	  }
+	  i++;
+   }
+   if(father[i] == '\0')
+   {
+	  return -1;
+   }
+}
 
 int mystrcpy(char* dest, char* from, int begPos, int endPos)
 {//把from范围内的字符串拷贝到目标字符串里面，左闭右包
@@ -96,7 +142,7 @@ int mystrcpy(char* dest, char* from, int begPos, int endPos)
    {
 	  dest[j++] = from[i++];
    }
-   
+
    dest[j] = '\0';
 }
 
@@ -242,11 +288,11 @@ int find_str_with_scope(char* str, char* word, int begPos, int endPos)
    {
 	  //不包含重叠情况，也即，abababa，aba，应return 2；
 	  int j = 0;
-	  if(str[i] == word[j])
+	  if(character_to_lower(str[i]) == word[j])
 	  {
 		 while(word[j] != '\0')
 		 {
-			if(str[i+j] != word[j])
+			if(character_to_lower(str[i+j]) != word[j])
 			{
 			   break;
 			}
@@ -370,7 +416,7 @@ int anno_beg_end_times_fill(char* str, int* begtimes, int* endtimes)
 			if(i+2 < len && str[i] == '-' && str[i+1] == '-' && str[i+2] == '>')
 			{
 			   endt++;
-			   i+=2;
+   			   i+=2;
 			   break;
 			}
 			i++;
@@ -395,54 +441,75 @@ int lable_beg_end_times_fill(char* str, char* beglable, char* endlable, int* beg
    int beglableCount = 0, endlableCount = 0;
    int len = strlen(str);
    int nolable = 0;
-   begt = mystrstr(str, beglable);
-   endt = mystrstr(str, endlable);
-   if(begt == endt)
-   {
-	  *begtimes = begt;
-	  *endtimes = endt;
-   }
-   else
-   {
-	  while(begt < len && endt < len)
+   
+   int count = 0;
+   int tempbeg = 0, tempend = 0;
+   
+   beglableCount = find_str_times(str, beglable);
+   endlableCount = find_str_times(str, endlable);
+	  
+   printf("str:%s\nbeglable:%s,times:%d, endlable:%s,times:%d\n", str, beglable, beglableCount\
+		 , endlable, endlableCount);
+   //  return 1;
+   if(beglableCount > endlableCount && beglableCount >= 2)
+   {//如果两个连续的script标签中间没有结束标签，则第二个为嵌入标签
+	  int tempbeg1 = -1, tempbeg2 = -1;
+	  tempbeg1 = mystrstr(str, beglable);
+	  tempbeg2 = mystrstr(str + tempbeg1 + strlen(beglable) , beglable);
+	  int endtimes = -1;
+	  if(tempbeg2 != -1)
 	  {
-		 int cur_pos = begt >= endt ? begt : endt;
-		 int temp =  mystrstr(str + cur_pos, beglable);
-		 begt = cur_pos + temp;
-		 if(temp != -1)
-		 {
-			nolable = 0;
-			beglableCount++;
-			temp = return_son_str_pos(str + begt, endlable);
-			endt = begt + temp; 
 
-			if(temp != -1)
-			{
-			   endlableCount++;
-			   nolable = 0;
-			}
-			else
-			{
-			   nolable++;
-			}
-
-		 }
-		 else
-		 {
-			nolable++;
-		 }
-
-		
-		 if(nolable == 2)
-		 {
-			break;
-		 }
+		 endtimes = find_str_with_scope(str, endlable, tempbeg1, tempbeg2);
 	  }
+	  if(endtimes == 0)
+	  {
+		 beglableCount--;
+	  }
+	  
+
+   }
+   *begtimes = beglableCount;
+   *endtimes = endlableCount;
+   /*
+   //处理两对同样的非法标签
+   
+   begt = mystrstr(str, beglable);
+   endt = return_son_str_pos(str, endlable);
+   if(begt != -1)
+   {
+	  beglableCount++;
+	  tempbeg = return_son_str_pos(str + begt, endlable);
+	  if(tempbeg != -1)
+	  {
+		 endt = begt + tempbeg;
+	  }
+   }
+   else if(endt != -1)
+   {
+	  endlableCount++;
+	  tempbeg = mylableStrstr(str + endt, beglable);
 
    }
 
-   *begtimes = begt;
-   *endtimes = endt;
+   endt = endt > begt ? endt : begt;
+   tempbeg = mystrstr(str + endt, beglable);
+   //去除第二组标签
+   if(tempbeg != -1)
+   {
+	  begt = tempbeg + endt;
+	  beglableCount++;
+	  tempend = return_son_str_pos(str + begt, endlable);
+	  if(tempend != -1)
+	  {
+		 endt = tempend + begt;
+		 endlableCount++;
+	  }
+   }
+  
+   *begtimes = beglableCount;
+   *endtimes = endlableCount;
+   */
 }
 
 int return_son_str_pos(char* father, char* son)

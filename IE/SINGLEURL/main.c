@@ -167,7 +167,7 @@ int main(int argc, char* argv[])
    
   // illegal_part_deal(lb);
    //count illegal lable
-   test_illegal_lable(lb);
+   //test_illegal_lable(lb);
    //file_buf_write(lb, "test_file.html");
    // discuz_fill_the_page(lb, &page);
    int is_discuz_flag = is_discuz(lb);
@@ -198,7 +198,8 @@ int main(int argc, char* argv[])
    }
    else
    {
-
+	  
+	  test_illegal_lable(lb);
 //	  annotation_part_handle(lb);
 //	  printf("wipe anno end\n");
 	  illegal_part_deal(lb);
@@ -206,7 +207,11 @@ int main(int argc, char* argv[])
 	  test_illegal_lable(lb);
 	  illegal_part_deal(lb);
 	  printf("end twice illgel wipe\n");
-	  //illegal_part_deal(lb);
+	  test_illegal_lable(lb);
+	  
+	  file_buf_write(lb, "test.html");
+	 // illegal_part_deal(lb);
+	 // test_illegal_lable(lb);
    //illegal_part_deal(lb);
 	 
 	  test_illegal_lable(lb);

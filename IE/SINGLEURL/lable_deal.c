@@ -34,6 +34,40 @@ void find_lable(LineBuf* lb, LineBuf* dest)
    }
 }
 
+void merge_illegal_lable(LineBuf* lb)
+{
+   LineBuf* p = lb->next;
+   LineBuf* temp;
+   int tempstr[10000] = {0};
+   int type = -1, type2 = -1, type3 = -1;
+   while(p)
+   {//<!-- , <script, <style
+	  int i = 0;
+	  char* line = p->str;
+	  int buflen = strlen(p->str);
+	  if(mystrstri(p->str, "<script") || 
+			mystrstri(p->str, "<styple") || 
+			(mystrstri(p->str, "<!--")))
+	  {
+		 if(mystrstri(p->str, "<!--"))
+		 {
+
+			while(mystrstr(p->str, "-->") == -1)
+			{
+			   
+			}
+		 }
+		 else
+		 {
+
+		 }
+	  }
+	//  while()
+	 
+	  p = p->next;
+   }
+}
+
 void count_illegal_lable(LineBuf* lb, 
 	  int* annobegNum, int* annoendNum, 
 	  int* scriptbegNum, int* scriptendNum,
@@ -66,8 +100,8 @@ void count_illegal_lable(LineBuf* lb,
 		 int t_b = 0, t_e = 0;
 		// *scriptbegNum += find_str_times(p->str, "<script");
 		// *scriptendNum += find_str_times(p->str, "</script>");
-		 printf("line:%d\t, beglb:%d, endlb:%d\n", p->line_no, *scriptbegNum, *scriptendNum);
-		 printf("str:%s\n", p->str);
+		// printf("line:%d\t, beglb:%d, endlb:%d\n", p->line_no, *scriptbegNum, *scriptendNum);
+		 //printf("str:%s\n", p->str);
 		 lable_beg_end_times_fill(p->str, "<script", "</script>", &t_b, &t_e);
 		 *scriptbegNum += t_b;
 		 *scriptendNum += t_e;
@@ -120,7 +154,14 @@ void illegal_part_deal(LineBuf* lb)
 	//		printf("after handle scipt:%s\n\n\n", beglb->str);
 		 
 	  }
-	  beglb = beglb->next;
+	  if(beglb)
+	  {
+		 beglb = beglb->next;
+	  }
+	  else
+	  {
+		 break;
+	  }
    }
 }
 
@@ -138,76 +179,114 @@ void illegal_lable_wipe(LineBuf** lb, char* beglable, char* endlable)
    {
 	  int begLableNum, endLableNum;
 	  //js代码的转义后字符已排除在外如"\'<script>"
-
 	  int is_anno = (mystrcmp(beglable, "<!--") || mystrcmp(endlable, "-->"));
-	  if(!is_anno)
+	  int is_script = (mystrcmp(beglable, "<script") || mystrcmp(endlable, "</script>"));
+	  if(!is_anno && !is_script)
 	  {
 		 begLableNum = find_str_times(endlb->str, beglable);
 		 endLableNum = find_str_times(endlb->str, endlable);
+	  }
+	  else if(is_script)
+	  {
+		 begLableNum = find_str_times(endlb->str, beglable);
+		 endLableNum = find_str_times(endlb->str, endlable);
+		 if(begLableNum > endLableNum && begLableNum > 1)
+		 {
+			int tempbeg = -1, tempend = -1;
+			int tempbeg2 = -1;
+			tempbeg = mystrstr(endlb->str, beglable);
+			tempbeg2 = mystrstr(endlb->str + tempbeg + strlen(beglable), endlable);
+
+			int times = -1;
+
+			times = find_str_with_scope(endlb->str, endlable, tempbeg, tempbeg2);
+			if(times == 0)
+			{
+			   begLableNum--;
+			   printf("chose illegal script***********************************\n");
+			}
+		 }
+//		 lable_beg_end_times_fill(endlb->str, "<script", "</script>", &begLableNum, &endLableNum);
+
 	  }
 	  else
 	  {
 		 anno_beg_end_times_fill(endlb->str, &begLableNum, &endLableNum);
 	  }
 
-	 // printf("no:%d, str:%s\n", endlb->line_no, endlb->str); 
-	 // printf("beglableNum:%d\tbeglable:%s\t", begLableNum, beglable);
+	  //printf("str:%s, line_no:%d\n", endlb->str, endlb->line_no); 
+	  //printf("beglable:%s times:%d,endlable:%s times:%d\n:", beglable, begLableNum, endlable, endLableNum);
 	  int begLableCount = 0;
 
 	  //printf("endlableNum:%d\tendlable:%s\n", endLableNum, endlable);
-//	  printf("endlstr:%s\n", endlb->str);
+	  //printf("endlstr:%s\n", endlb->str);
 	  if(begLableNum == endLableNum)
 	  {//此句话有偶数个注释标签，所以此行的注释不会延伸到下一行，把
 		 //此行注释处理后把剩下的信息赋值回去。
 		 int i = 0;
 		 char* c = endlb->str;
-   //printf("single line detect\n"); 
-	//	 printf("begin start lable getting\n");
+		 //printf("single line detect\n"); 
+		 //	 printf("begin start lable getting\n");
 		// printf("len:%d\n", strlen(c));
 		 int len = strlen(c);
-
+		 
 		 //注释型和其他的类型处理分开：
 		 if(!is_anno)
-		 {
-			for(i = 0; i < len && begLableCount < begLableNum; ++i)
+		 {//这里处理需要注意，不能一次性找到全部的开始标签了，要一对一对的找
+			//找开始标签
+			
+			
+			int tempbeg = -1, tempend = -1;
+			tempbeg = mystrstr(endlb->str, beglable);
+			LablePosPair* q1 = (LablePosPair*)malloc(sizeof(LablePosPair));
+			q1->next = NULL;
+			//处理最多单行三对标签
+			if(tempbeg != -1)
 			{
-
-			   if(scope_str_cmp(c, beglable, i))
+			   q1->left = tempbeg;
+			   tempend = return_son_str_pos(endlb->str + tempbeg, endlable);
+			   if(tempend != -1)
 			   {
-				  if(c != &endlb->str[0] && *(c-1) == '\'' )
-				  {
-					 continue;
-				  }
-				  //	   printf("%c\n", c[i]);
-				  LablePosPair* q = (LablePosPair*)malloc(sizeof(LablePosPair));
-				  q->next = NULL;
-				  q->left = i;
-				  p->next = q;
+				  tempend += tempbeg;
+				  q1->right = tempend;
+				  p->next = q1;
 				  p = p->next;
-				  begLableCount++;
 			   }
-
+			   
 			}
-
-			p = templpp->next;
-
-			i = 0;
-			//找到结束字符的结束位置
-			while(p && c[i+strlen(endlable)-1])
+			/*
+			LablePosPair* q2 = (LablePosPair*)malloc(sizeof(LablePosPair));
+			q2->next = NULL;
+			tempbeg = mystrstr(endlb->str + tempend, beglable);
+			
+			if(tempbeg != -1)
 			{
-			   i = p->left;
-			   while(p && c[i+strlen(endlable)-1])
+			   tempbeg = tempbeg + tempend;
+			   q2->left = tempbeg;
+			   tempend = mystrstr(endlb->str + tempbeg, endlable);
+			   if(tempend != -1)
 			   {
-				  if(scope_str_cmp(c, endlable, i))
-				  {
-					 p->right = i+strlen(endlable)-1;
-					 break;
-				  }
-				  i++;
+				  q2->right = tempend;
+				  p->next = q2;
+				  p = p->next;
 			   }
-			   p = p->next;
 			}
-
+			LablePosPair* q3 = (LablePosPair*)malloc(sizeof(LablePosPair));
+			q3->next = NULL;
+			tempbeg = mystrstr(endlb->str + tempend, beglable);
+			if(tempbeg != -1)
+			{
+			   tempbeg = tempbeg + tempend;
+			   q3->left = tempbeg;
+			   tempend = mystrstr(endlb->str + tempbeg, endlable);
+			   if(tempend != -1)
+			   {
+				  q3->right = tempend;
+				  p->next = q3;
+				  p = p->next;
+			   }
+			}
+			*/
 		 }//end if anno
 		 else
 		 {//开始处理注释标签的单行情况
@@ -222,6 +301,7 @@ void illegal_lable_wipe(LineBuf** lb, char* beglable, char* endlable)
 				  p->next = q;
 				  p = p->next;
 				  i+=3;
+
 				  //在找到一个开始注释标签以后直接原地寻找结束标签
 				  while(i < len) 
 				  {
@@ -312,7 +392,7 @@ void illegal_lable_wipe(LineBuf** lb, char* beglable, char* endlable)
 			}
 
 		 }
-
+		 
 		 //printf("test content lablepari:\n");
 		 //test_lpp(templpp);
 		 p = templpp->next;
@@ -331,10 +411,10 @@ void illegal_lable_wipe(LineBuf** lb, char* beglable, char* endlable)
 		 }
 	//	 printf("endlb deal end\tline_no:%d\n", endlb->line_no);
 		 c[j] = '\0';
-		 
+		 *lb = endlb->before;
 	  }
 	  else if(begLableNum > endLableNum)
-	  {//如果是多行注释则合并成一行，下一回合处理
+	  {//如果是多行非法标签则合并成一行，下一回合处理
 		// printf("multi line\n");
 	//	 printf("endlb->str:%s\n", endlb->str);
 		 LineBuf* temptemplb = endlb;	//保存开始的指针，先计算长度，然后第二遍才分配空间
@@ -342,28 +422,41 @@ void illegal_lable_wipe(LineBuf** lb, char* beglable, char* endlable)
 		 LineBuf* needToBeDeleteLb;
 		 char tempstr[100000] = {0};
 
-		 
+		 		 
 		 buffLen+= strlen(temptemplb->str);
 		 if(endlb->next)
 		 {//结束标签指针往后遍历一个然后再找结束标签
 			endlb = endlb->next;
 		 }
-	   
-		 while(endlb && (!mystrstri(endlb->str, endlable)))
+		 //script标签单独处理
+		 if(!is_script)
 		 {
-			//printf("endlb no:%d, endstr:%s\n", endlb->line_no, endlb->str);
+			while(endlb && (!mystrstri(endlb->str, endlable)))
+			{
+			   //printf("endlb no:%d, endstr:%s\n", endlb->line_no, endlb->str);
 
-			buffLen += strlen(endlb->str);
-			endlb = endlb->next;
+			   buffLen += strlen(endlb->str);
+			   endlb = endlb->next;
+			}	
 		 }
+		 /*
+		 else
+		 {
+			while(endlb && (mystrstr(endlb->str, endlable) != -1) && (mystrstr(endlb->str, beglable) != -1))
+			{//如果是script标签，防止嵌套情况找到
+			   buffLen += strlen(endlb->str);
+			   endlb = endlb->next;
+			}
+		 }
+		*/
 		 
 
 		 if(endlb == NULL)
 		 {
-			printf("beglablenum:%d, endlableNum:%d\n", begLableNum, endLableNum);
-			LineBuf* ttlb = temptemplb->next;
-			printf("temptemptempstr:%s\nlieno:%d\n", temptemplb->str, temptemplb->line_no);
-			printf("NULLNULLNULL****************\n");
+			//printf("beglablenum:%d, endlableNum:%d\n", begLableNum, endLableNum);
+			//LineBuf* ttlb = temptemplb->next;
+			//printf("temptemptempstr:%s\nlieno:%d\n", temptemplb->str, temptemplb->line_no);
+			//printf("NULLNULLNULL****************\n");
 		 }
 		 else
 		 {

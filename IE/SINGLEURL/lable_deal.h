@@ -5,6 +5,8 @@
 
 void find_lable(LineBuf* lb, LineBuf* dest);
 
+void merge_illegal_lable(LineBuf* lb);
+
 void count_illegal_lable(LineBuf* lb, 
 	  int* annobegNum, int* annoendNum, 
 	  int* scriptbegNum, int* scriptendNum,

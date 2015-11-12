@@ -11,6 +11,8 @@ int fill_buf(char* filename, LineBuf* lb, int file_num);	//把文件内容读取
 
 int file_read_full(char** dest, const char* filename);		//把整个文件读取成一个字符串
 
+int file_buf_write(LineBuf* lb, const char* filename);
+
 int Enqueue(buf_queue* bf, char* buf);			//固定块入队操作
 
 int Dequeue(buf_queue* bf, char* buf);			//固定块出队操作

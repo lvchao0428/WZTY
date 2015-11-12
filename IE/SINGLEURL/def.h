@@ -31,6 +31,11 @@ typedef int LableType;
 #define NOLINKTYPE		10
 #define NONLABLE		-1
 
+//需要消除的非法标签也定义为此类型
+#define SCRIPTTYPE		11
+#define STYLETYPE		12
+#define ANNOTYPE		13
+
 typedef int ContentType;	//内容前面的标签类型
 
 #define HREFTYPE		0
@@ -60,6 +65,7 @@ typedef struct LineBuf
 {
    int file_no;
    int line_no;
+  // LablePosPair* ill_pair;	//此行存在的非法标签信息
    ContentType ct;
    char* str;
    struct LineBuf* next;

@@ -13,9 +13,10 @@
 int no_discuz_fill_the_page(LineBuf* pb, Page* page)
 {
    char* line = NULL;
-
+   int max_content_len = 0;
    LineBuf* beglb = pb->next;
-
+   LineBuf* content_buf = (LineBuf*)malloc(sizeof(LineBuf));
+   content_buf->next = NULL;
    while(beglb != NULL)
    {
 	  line = beglb->str;
@@ -24,10 +25,11 @@ int no_discuz_fill_the_page(LineBuf* pb, Page* page)
 	  
 	  //printf("checked %dth line\n%s\n", beglb->line_no, beglb->str);
 	  lt = check_normal_lable(beglb, line);
-	 // printf("%s\n", line);
+	  // printf("%s\n", line);
 	  //处理注释的区域
-	 // deal_anno(&beglb);
-	 // deal_script(&beglb);
+	  // deal_anno(&beglb);
+	  // deal_script(&beglb);
+	  
 	  switch(lt)
 	  {
 		 case TITLELABLE:
@@ -40,14 +42,11 @@ int no_discuz_fill_the_page(LineBuf* pb, Page* page)
 			break;
 		 case CONTENTLABLE:
 			//检查所有div table标签，符合标准的一直找到标签为止
-			if(page->content_filled != 1)
-			{
 			   printf("conetne checked!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-			   deal_normal_content(&beglb, page);
+			   deal_normal_content(&beglb, page, content_buf);
 			   printf("over extract contennt..........................\n\n\n");
 			   //test wordlen
-			//   int wordlen = word_length_get(beglg->str);
-			}
+			   //int wordlen = word_length_get(beglg->str);
 			break;
 		 default:
 			break;
@@ -58,17 +57,46 @@ int no_discuz_fill_the_page(LineBuf* pb, Page* page)
 	  }
 	  beglb = beglb->next;
    }
+
+   //find longest content
+   LineBuf* tempcontent = content_buf->next;
+   LineBuf* longestContent;
+   while(tempcontent)
+   {
+	  int templen = strlen(tempcontent->str);
+	  if(max_content_len < templen)
+	  {
+		 max_content_len = templen;
+		 longestContent = tempcontent;
+	  }
+	  tempcontent = tempcontent->next;
+   }
+   if(max_content_len > 0)
+   {
+	  page->content = (char*)realloc(page->content, sizeof(char)*(strlen(longestContent->str)+1));
+	  strcpy(page->content, longestContent->str);
+   }
+   else
+   {
+	  page->content = (char*)realloc(page->content, sizeof(char)*10);
+	  strcpy(page->content, "NULL CONTENT");
+   }
 }
 
-void deal_normal_content(LineBuf** lb, Page* page)
+void deal_normal_content(LineBuf** lb, Page* page, LineBuf* content_buf)
 {
    LineBuf* beglf, *endlf;
    beglf = endlf = *lb;
 
+   LineBuf* tempcontent = content_buf;
+   while(tempcontent->next)
+   {//find content_buf end
+	  tempcontent = tempcontent->next;
+   }
    int nlen = 0;
    char tempstr[100000] = {0};
    int line_num = 0;
-
+   
    int comma_num = 0;
    
 
@@ -94,15 +122,22 @@ void deal_normal_content(LineBuf** lb, Page* page)
   // printf("commaNum:%dstr:%s\n", comma_num, tempstr);
    if(comma_num > 5 )//&& is_word_longer_than_lable(tempstr) == 1)
    {
-
-	 // printf("tempstr:%s\n", tempstr);
-	 
+	  //printf("tempstr:%s\n", tempstr);
 	  extract_content_with_punct(&endlf, tempstr);
-	  	
+	  
 	  //tempstr 存储处理好的内容
 	  page->content = (char*)malloc(sizeof(char)*(strlen(tempstr) + 1));
 	  strcpy(page->content, tempstr);
+	  
+	  LineBuf* tempbuf = (LineBuf*)malloc(sizeof(LineBuf));
+	  tempbuf->next = NULL;
+	  tempbuf->str = (char*)malloc(sizeof(char)*(strlen(tempstr) + 1));
+	  strcpy(tempbuf->str, tempstr);
+	  
+	  tempcontent->next = tempbuf;
+	  tempcontent = tempcontent->next;
 	  page->content_filled = 1;
+
    }
    else if(comma_num == 0)
    {

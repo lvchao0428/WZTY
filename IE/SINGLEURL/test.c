@@ -47,7 +47,7 @@ int test_illegal_lable(LineBuf* lb)
 {
    int annobegNum = 0, annoendNum = 0, scriptbegNum = 0, scriptendNum = 0,\
 					stylebegNum = 0, styleendNum = 0;
-
+   
    count_illegal_lable(lb,&annobegNum, &annoendNum,\
 		 &scriptbegNum, &scriptendNum,\
 		 &stylebegNum, &styleendNum);
