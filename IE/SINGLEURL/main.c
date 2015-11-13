@@ -92,6 +92,20 @@ void test_lbp(LineBuf* lbp[HTMLCOUNT])
    }
 }
 
+void init_page(Page* page)
+{
+   memset(page, 0, sizeof(*page));
+   /*
+   page->title = NULL;
+   page->author = NULL;
+   page->time = NULL;
+   page->click_count = NULL;
+   page->replay_count = NULL;
+   page->content = NULL;
+   page->title_filled = 0;
+*/
+}
+
 int main(int argc, char* argv[])
 {
    //test read file
@@ -155,69 +169,102 @@ int main(int argc, char* argv[])
    */
    //
    //单独测试代码
-   Page page;
-
-   LineBuf* lb = (LineBuf*)malloc(sizeof(LineBuf));
-   lb->next = NULL;
-
-   fill_buf(argv[1], lb, 0);
-   
-   LineBuf* dest = (LineBuf*)malloc(sizeof(LineBuf));
-   dest->next = NULL; 
-   
-  // illegal_part_deal(lb);
-   //count illegal lable
-   //test_illegal_lable(lb);
-   //file_buf_write(lb, "test_file.html");
-   // discuz_fill_the_page(lb, &page);
-   int is_discuz_flag = is_discuz(lb);
-   if(is_discuz_flag)
-   {
-	  
-	  printf("discuz dealing.................\n");
-	 
-   }
-   else
-   {
-
-	  printf("nodiscuz dealing.................\n");
-
-	 
-   }
   
-
-   if(is_discuz_flag)
+   
+   while(1)
    {
+	  Page page;
 
-	  discuz_fill_the_page(lb, &page);
-	  printf("title:%s\n", page.title);
-	  printf("time:%s\n", page.time);
-	  printf("clickcount:%s\n", page.click_count);
-	  printf("replaycount:%s\n", page.replay_count);
-	  printf("content:%s\n", page.content);
+	  init_page(&page);
+	  LineBuf* lb = (LineBuf*)malloc(sizeof(LineBuf));
+	  lb->next = NULL;
+
+	  int page_num = 0 ;
+	  char filename[50] = {0};
+	  printf("enter filenum:\n");
+	  int flag = scanf("%d", &page_num);
+	  system("clear");
+	  if(flag == -1)
+	  {
+		 break;
+	  }
+	  sprintf(filename, "./utf_html/%d.html", page_num);
+	  fill_buf(filename, lb, 0);
+	  //test read file
+	  LineBuf* temp = lb->next;
+	  if(temp == NULL)
+	  {
+		 printf("null file\n");
+		 exit(0);
+	  }
+	  /*
+		 while(temp)
+		 {
+	  //printf("")
+	  }
+	  */
+	  LineBuf* dest = (LineBuf*)malloc(sizeof(LineBuf));
+	  dest->next = NULL; 
+
+	  // illegal_part_deal(lb);
+	  //count illegal lable
+	  //test_illegal_lable(lb);
+	  //file_buf_write(lb, "test_file.html");
+	  // discuz_fill_the_page(lb, &page);
+	  int is_discuz_flag = is_discuz(lb);
+	  if(is_discuz_flag)
+	  {
+
+		 printf("discuz dealing.................\n");
+
+	  }
+	  else
+	  {
+
+		 printf("nodiscuz dealing.................\n");
+
+
+	  }
+
+
+	  if(is_discuz_flag)
+	  {
+
+		 discuz_fill_the_page(lb, &page);
+		 printf("title:%s\n", page.title);
+		 printf("author:%s\n", page.author);
+		 printf("time:%s\n", page.time);
+		 printf("clickcount:%s\n", page.click_count);
+		 printf("replaycount:%s\n", page.replay_count);
+		 printf("content:%s\n", page.content);
+	  }
+	  else
+	  {
+
+		 test_illegal_lable(lb);
+		 //	  annotation_part_handle(lb);
+		 //	  printf("wipe anno end\n");
+		 illegal_part_deal(lb);
+		 printf("end once illgel wipe\n");
+		 test_illegal_lable(lb);
+
+		 // file_buf_write(lb, "test.html");
+		 // illegal_part_deal(lb);
+		 // printf("end twice illgel wipe\n");
+		 // test_illegal_lable(lb);
+
+		 // illegal_part_deal(lb);
+		 // test_illegal_lable(lb);
+		 //illegal_part_deal(lb);
+
+		 //test_illegal_lable(lb);
+		 no_discuz_fill_the_page(lb, &page);
+		 printf("title:%s\n", page.title);
+		 printf("content:%s\n", page.content);
+	  }
+	  page_free(&page);
+	  fflush(stdout);
    }
-   else
-   {
-	  
-	  test_illegal_lable(lb);
-//	  annotation_part_handle(lb);
-//	  printf("wipe anno end\n");
-	  illegal_part_deal(lb);
-	  printf("end once illgel wipe\n");
-	  test_illegal_lable(lb);
-	  illegal_part_deal(lb);
-	  printf("end twice illgel wipe\n");
-	  test_illegal_lable(lb);
-	  
-	  file_buf_write(lb, "test.html");
-	 // illegal_part_deal(lb);
-	 // test_illegal_lable(lb);
-   //illegal_part_deal(lb);
-	 
-	  test_illegal_lable(lb);
-	  no_discuz_fill_the_page(lb, &page);
-	  printf("title:%s\n", page.title);
-	  printf("content:%s\n", page.content);
-   }
+
    return 0;
 }

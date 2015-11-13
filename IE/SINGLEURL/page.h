@@ -15,4 +15,6 @@ int page_null_count(LineBuf* lbp[HTMLCOUNT]);
 
 void page_dis_count(LineBuf* lbp[HTMLCOUNT], Page* page[HTMLCOUNT], int* corr);		//计数网页里面含有多少个discuz型网页
 
+void page_free(Page* page);
+
 #endif

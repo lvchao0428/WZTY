@@ -38,6 +38,7 @@ int discuz_fill_the_page(LineBuf* pb, Page* page)
 			//有可能是title项
 			if(page->title_filled != 1)
 			{//如果标题项还没有被填充过，则把之后内容当做标题处理
+			   printf("deal title\n");
 			   deal_title(&p, page);
 			}
 			
@@ -88,7 +89,7 @@ int deal_time(LineBuf** lf, Page* page)
    //find begPos
    LablePosPair* lpp = (LablePosPair*)malloc(sizeof(LablePosPair));
    lpp->next = NULL;
-   printf("time:%s\n", endlf->str);
+  // printf("time:%s\n", endlf->str);
    find_all_greater_lower(line, lpp);
    strcpy(tempstr, line);
 /*
@@ -139,12 +140,14 @@ int deal_clickAndreplay(LineBuf** lf, Page* page)
 	  char temp_replay_str[100] = {0};
 	  mystrcpy(temp_check_str, endlf->str, check_beg_pos, check_end_pos);
 	  mystrcpy(temp_replay_str, endlf->str, replay_beg_pos, replay_end_pos);
-	 
+	
+	  /*
 	  printf("checkbegpos:%d, checkendpos:%d\n", check_beg_pos, check_end_pos);
 	  printf("replaybegpos:%d, replayendpos:%d\n", replay_beg_pos, replay_end_pos);
 	  printf("test click:%s\n", temp_check_str);
 	  printf("test replay_str:%s\n", temp_replay_str);
 	  printf("double checked\n"); 
+	  */
 	  //提取点击的次数
 	  LablePosPair* check_lpp = (LablePosPair*)malloc(sizeof(LablePosPair));
 	  check_lpp->next = NULL;
@@ -173,7 +176,7 @@ int deal_clickAndreplay(LineBuf** lf, Page* page)
 	  if(mystrstr(endlf->str, "查看") != -1)
 	  {//处理查看和回复不在同一行的情况
 		 int click_beg_pos, click_end_pos;
-		 printf("single chakan.................******...........\n");
+		 //printf("single chakan.................******...........\n");
 		 click_beg_pos = mystrstr(endlf->str, "查看");
 		 click_beg_pos += mystrstr(endlf->str, "<span");
 		 click_end_pos = click_beg_pos + return_son_str_pos(endlf->str, "</span>");
@@ -194,7 +197,7 @@ int deal_clickAndreplay(LineBuf** lf, Page* page)
 	  if((replay_pos = mystrstr(endlf->str, "回复")) != -1)
 	  {
 		 int replay_beg_pos, replay_end_pos;
-		 printf("single huifu**************............*************\n");
+		 //printf("single huifu**************............*************\n");
 		 replay_beg_pos = mystrstr(endlf->str, "回复");
 		 replay_beg_pos += mystrstr(endlf->str, "<span");
 		 replay_end_pos = replay_beg_pos + return_son_str_pos(endlf->str, "</span>");
@@ -228,14 +231,14 @@ int deal_author(LineBuf** lf, Page* page)
 
    //div标签结尾，所以要找到div包含的所有内容，即为姓名
    //find begPos
-   char tempstr[1000] = {0};
-   while(mystrstr(endlf->str, "</div>") == -1)
+   char tempstr[10000] = {0};
+   while(endlf && mystrstr(endlf->str, "</div>") == -1)
    {
 	  strcat(tempstr, endlf->str);
 	  endlf = endlf->next;
    }
-   
-   page->author = (char*)malloc(sizeof(char)*50);
+    
+   page->author = (char*)malloc(sizeof(char)*(strlen(tempstr) + 1));
    LablePosPair* lpp = (LablePosPair*)malloc(sizeof(LablePosPair));
    lpp->next = NULL;
    find_all_greater_lower(tempstr, lpp);
@@ -287,7 +290,7 @@ int deal_content(LineBuf** lf, Page* page, int has_post)
 		 endlf = endlf->next;	  
 	  }
 	  strcat(tempstr, endlf->str);
-	  printf("whole str is:\n", tempstr);
+	  //printf("whole str is:\n", tempstr);
 	  
 	  LablePosPair* lpp = (LablePosPair*)malloc(sizeof(LablePosPair));
 	  lpp->next = NULL;
@@ -344,34 +347,28 @@ int deal_content(LineBuf** lf, Page* page, int has_post)
 //处理标题
 int deal_title(LineBuf** lf, Page* page)
 {
-   int i = 0;
-   char lable[10];
-   int j = 0;
    LineBuf* templf = *lf;
-   char* line = templf->str;
-   char temptitle[300];
- //  printf("%s\n", line);
-   int begPos = 0, endPos = 0;
-   strcpy(temptitle, line);
+   char temptitle[10000];
+   int begPos = -1, endPos = -1;
+   strcpy(temptitle, templf->str);
    LablePosPair* lpp = (LablePosPair*)malloc(sizeof(LablePosPair));
    lpp->next = NULL;
+   begPos = mystrstr(temptitle, "<title");
+   endPos = return_son_str_pos(temptitle, "</title>"); 
+   temptitle[endPos+1] = '\0';
    find_all_greater_lower(temptitle, lpp);
+   test_lpp(lpp, temptitle);
    dispos_son_lable(temptitle, lpp);
-/*
-   //find begPos
-   while(line[begPos] != '\0' && line[begPos++] != '>');
-   //find endPos
-   endPos = begPos;
-   while(line[endPos] != '\0' && line[endPos] != '<') endPos++;
-//   printf("begpos: %d\n", begPos);
-//   printf("endpos: %d\n", endPos);
-*/
+   printf("title:%s\n", temptitle);
+   
+
+
    page->title = (char*)malloc(sizeof(char)*(strlen(temptitle)+1));
-//   mystrcpy(page->title, temptitle, begPos, endPos);
    strcpy(page->title, temptitle);
 
    templf = templf->next;
    page->title_filled = 1;
+   *lf = templf->next;
    return 1;
 }
 

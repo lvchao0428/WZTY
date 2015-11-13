@@ -43,7 +43,7 @@ int no_discuz_fill_the_page(LineBuf* pb, Page* page)
 		 case CONTENTLABLE:
 			//检查所有div table标签，符合标准的一直找到标签为止
 			   printf("conetne checked!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-			   deal_normal_content(&beglb, page, content_buf);
+			  // deal_normal_content(&beglb, page, content_buf);
 			   printf("over extract contennt..........................\n\n\n");
 			   //test wordlen
 			   //int wordlen = word_length_get(beglg->str);
@@ -51,26 +51,34 @@ int no_discuz_fill_the_page(LineBuf* pb, Page* page)
 		 default:
 			break;
 	  }
+	  /*
 	  if(page->content_filled == 1)
 	  {
 		 break;
 	  }
+	  */
 	  beglb = beglb->next;
    }
 
    //find longest content
-   LineBuf* tempcontent = content_buf->next;
+	 LineBuf* tempcontent = content_buf->next;
    LineBuf* longestContent;
    while(tempcontent)
    {
+	  
 	  int templen = strlen(tempcontent->str);
+	  
+	 // printf("str:%s\n", tempcontent->str);
+	 // printf("length:%d\n", strlen(tempcontent->str));
 	  if(max_content_len < templen)
 	  {
+
 		 max_content_len = templen;
 		 longestContent = tempcontent;
 	  }
 	  tempcontent = tempcontent->next;
    }
+
    if(max_content_len > 0)
    {
 	  page->content = (char*)realloc(page->content, sizeof(char)*(strlen(longestContent->str)+1));
@@ -78,7 +86,20 @@ int no_discuz_fill_the_page(LineBuf* pb, Page* page)
    }
    else
    {
-	  page->content = (char*)realloc(page->content, sizeof(char)*10);
+	  if(page->content == NULL)
+	  {
+		 page->content = (char*)malloc(sizeof(char)*20);
+		 strcpy(page->content, "NULL CONTENT");
+	  }
+	  else if(strlen(page->content) <= 20)
+	  {
+		 page->content = (char*)realloc(page->content, sizeof(char)*20);
+		 strcpy(page->content, "NULL CONTENT");
+	  }
+   }
+   if(page->content == NULL)
+   {
+	  page->content = (char*)malloc(sizeof(char)*20);
 	  strcpy(page->content, "NULL CONTENT");
    }
 }

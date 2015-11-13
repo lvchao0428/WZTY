@@ -203,7 +203,7 @@ void illegal_lable_wipe(LineBuf** lb, char* beglable, char* endlable)
 			if(times == 0)
 			{
 			   begLableNum--;
-			   printf("chose illegal script***********************************\n");
+			 //  printf("chose illegal script***********************************\n");
 			}
 		 }
 //		 lable_beg_end_times_fill(endlb->str, "<script", "</script>", &begLableNum, &endLableNum);
@@ -748,7 +748,7 @@ void find_all_greater_lower(char* line, LablePosPair* lpp)
    LablePosPair* p = lpp;
    while(line[i] != '\0')
    {
-	  if(line[i] == '<' && ((line[i+1] >= 'a' && line[i+1] <= 'z') || (line[i+1] == '/') || (line[i+1] == '!')) || (line[i+1] >= 'A' && line[i+1] <= 'Z'))
+	  if(line[i] == '<' && ((line[i+1] >= 'a' && line[i+1] <= 'z') || (line[i+1] == '/') || (line[i+1] == '!') || (line[i+1] >= 'A' && line[i+1] <= 'Z')))
 	  {
 		
 		 LablePosPair* q = (LablePosPair*)malloc(sizeof(LablePosPair));

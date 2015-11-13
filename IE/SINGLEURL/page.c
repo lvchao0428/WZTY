@@ -116,3 +116,13 @@ void page_dis_count(LineBuf* lbp[HTMLCOUNT], Page* page[HTMLCOUNT], int* correct
   // printf("dis_count is :%d,total_count:%d, dis_ratio is:%lf\n", dis_count, total_count, dis_ratio);
 }
 
+void page_free(Page* page)
+{
+   free(page->title);
+   free(page->author);
+   free(page->time);
+   free(page->click_count);
+   free(page->replay_count);
+   free(page->content);
+   
+}
