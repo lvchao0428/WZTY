@@ -35,16 +35,16 @@ int no_discuz_fill_the_page(LineBuf* pb, Page* page)
 		 case TITLELABLE:
 			if(page->title_filled != 1)
 			{
-			   printf("title checked\n");
+			  // printf("title checked\n");
 			   deal_title(&beglb, page);
 			}
 
 			break;
 		 case CONTENTLABLE:
 			//检查所有div table标签，符合标准的一直找到标签为止
-			   printf("conetne checked!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-			  // deal_normal_content(&beglb, page, content_buf);
-			   printf("over extract contennt..........................\n\n\n");
+			  // printf("conetne checked!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+			   deal_normal_content(&beglb, page, content_buf);
+			  // printf("over extract contennt..........................\n\n\n");
 			   //test wordlen
 			   //int wordlen = word_length_get(beglg->str);
 			break;
@@ -61,7 +61,7 @@ int no_discuz_fill_the_page(LineBuf* pb, Page* page)
    }
 
    //find longest content
-	 LineBuf* tempcontent = content_buf->next;
+   LineBuf* tempcontent = content_buf->next;
    LineBuf* longestContent;
    while(tempcontent)
    {
@@ -102,6 +102,9 @@ int no_discuz_fill_the_page(LineBuf* pb, Page* page)
 	  page->content = (char*)malloc(sizeof(char)*20);
 	  strcpy(page->content, "NULL CONTENT");
    }
+
+
+  // free_linebuf()
 }
 
 void deal_normal_content(LineBuf** lb, Page* page, LineBuf* content_buf)
@@ -133,6 +136,7 @@ void deal_normal_content(LineBuf** lb, Page* page, LineBuf* content_buf)
    LablePosPair* lpp = (LablePosPair*)malloc(sizeof(LablePosPair));
    lpp->next = NULL;
    out_content_scope(tempstr, lpp);
+   free_LablePosPair(lpp);
    //copy_scope_str_to_str(tempstr, lpp);
    if(comma_num > 1)
    {

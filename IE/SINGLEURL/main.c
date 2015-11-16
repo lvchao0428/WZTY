@@ -4,7 +4,6 @@
     > Mail: 410148119@qq.com 
     > Created Time: Tue Sep 22 11:31:43 2015
  ************************************************************************/
-
 #include<stdio.h>
 #include"page.h"
 #include"discuz_extract.h"
@@ -13,9 +12,11 @@
 #include"myfiledeal.h"
 #include<stdlib.h>
 #include"test.h"
+//#include"artical.h"
+
 
 #define TITLE_LEN 50
-
+/*
 void test_annotate(LineBuf* lb)
 {
    LineBuf* templb = lb->next;
@@ -51,6 +52,7 @@ void free_dest_lb(LineBuf* dest)
 	  free(q);
    }
 }
+*/
 /*
 void test_lb_comma(LineBuf* lb)
 {
@@ -75,7 +77,7 @@ void test_lb_comma(LineBuf* lb)
    }
 }
 */
-
+/*
 void test_lbp(LineBuf* lbp[HTMLCOUNT])
 {
    int i;
@@ -91,19 +93,11 @@ void test_lbp(LineBuf* lbp[HTMLCOUNT])
 	  
    }
 }
-
+*/
 void init_page(Page* page)
 {
    memset(page, 0, sizeof(*page));
-   /*
-   page->title = NULL;
-   page->author = NULL;
-   page->time = NULL;
-   page->click_count = NULL;
-   page->replay_count = NULL;
-   page->content = NULL;
-   page->title_filled = 0;
-*/
+  
 }
 
 int main(int argc, char* argv[])
@@ -118,9 +112,9 @@ int main(int argc, char* argv[])
 	  exit(-1);
    }
 */
-  /* 
-   LineBuf* lbp[HTMLCOUNT];
-   Page* page[HTMLCOUNT];
+   //LineBuf* lbp[HTMLCOUNT];
+   //Page* page[HTMLCOUNT];
+  /*
    int i = 0;
    for(i = 0; i < HTMLCOUNT; ++i)
    {
@@ -128,59 +122,103 @@ int main(int argc, char* argv[])
 	  lbp[i]->next = NULL;
 	  page[i] = (Page*)malloc(sizeof(Page));
    }
-
-   file_content_batching_deal(lbp);	//读取所有819个网页
+*/
+   //file_content_batching_deal(lbp);	//读取所有819个网页
    
 //   int null_count =    page_null_count(lbp);
  //  printf("null count:%d\n", null_count);
    
 
-   int correct_arr[HTMLCOUNT] = {0};
+ //  int correct_arr[HTMLCOUNT] = {0};
    
    //page_dis_count(lbp, page, correct_arr); 
    
   
-   int num = 0;
+   //int num = 0;
    //抽样测试代码:
-   while(num != -1)
+  /*
+   int title_num = 0;
+   int time_num = 0;
+   int author_num = 0;
+   int content_num = 0;
+   int replay_num = 0;
+   int click_num = 0;
+   int discuz_num = 0;
+   int null_file_num = 0;
+//	 while(num != -1)
+//   {
+   int i = 1;
+   for(; i < HTMLCOUNT; ++i)
    {
 	  Page page;
-	  printf("enter num:");
-	  scanf("%d", &num);
-	  if(is_discuz(lbp[num]))
+	  memset(&page, 0, sizeof(page));
+	 // printf("enter num:");
+	 // scanf("%d", &num);
+
+	  char filename[50] = {0};
+	  sprintf(filename, "./utf_html/%d.html", i);
+   	  char* deststr;
+	  int filelen = file_read_full(&deststr, filename);
+	  if(deststr == NULL || strlen(deststr) < 20)
 	  {
-		 discuz_fill_the_page
+		 null_file_num++;
+		 continue;
 	  }
-//	  printf("is dis:%d\n", is_discuz(lbp[num]));
-	  if(strlen(page[num]->content) < 10)
+	  artical_extract(deststr, filelen, NULL, &page);
+	  
+	  if(page.title != NULL)
 	  {
-		 printf("title:%s\n", page[num]->title);
-		 printf("content extract failed\n");
+		 title_num ++;
 	  }
-	  else
+	  if(page.time != NULL)
 	  {
-		 printf("title:%s\n", page[num]->title);
-		 printf("content:%s\n", page[num]->content);
+		 time_num ++;
 	  }
+	  if(page.author != NULL)
+	  {
+		 author_num ++;
+	  }
+	  if(page.content != NULL)
+	  {
+		 content_num++;
+	  }
+	  if(page.replay_count != NULL)
+	  {
+		 replay_num++;
+	  }
+	  if(page.click_count != NULL)
+	  {
+		 click_num++;
+	  }
+
+	  //检测成功正确率，和计数操作
+	  
+	  printf("html-%d finished...\n", i);
 
    }
    
-   //test_lbp(lbp);
-   */
-   //
+   printf("titlenum:%d, auc rate:%lf\n", title_num, (double)title_num/HTMLCOUNT);
+   printf("timenum:%d, auc rate:%lf\n", time_num, (double)time_num/HTMLCOUNT);
+   printf("authornum:%d, auc rate:%lf\n", author_num, (double)author_num/HTMLCOUNT);
+   printf("contentnum:%d, auc rate:%lf\n", content_num, (double)content_num/HTMLCOUNT);
+   printf("replaynum:%d, auc rate:%lf\n", replay_num, (double)replay_num/HTMLCOUNT);
+   printf("clicknum:%d, auc rate:%lf\n", click_num, (double)click_num/HTMLCOUNT);
+   //printf("")
+   // }
+*/
    //单独测试代码
   
    
-   while(1)
-   {
+  // while(1)
+  // {
+  //
 	  Page page;
 
 	  init_page(&page);
 	  LineBuf* lb = (LineBuf*)malloc(sizeof(LineBuf));
 	  lb->next = NULL;
-
+/*
 	  int page_num = 0 ;
-	  char filename[50] = {0};
 	  printf("enter filenum:\n");
 	  int flag = scanf("%d", &page_num);
 	  system("clear");
@@ -188,24 +226,36 @@ int main(int argc, char* argv[])
 	  {
 		 break;
 	  }
-	  sprintf(filename, "./utf_html/%d.html", page_num);
-	  fill_buf(filename, lb, 0);
+	  */
+/*
+	  
+	  printf("title:%s\n", page.title);
+	  printf("author:%s\n", page.author);
+	  printf("time:%s\n", page.time);
+	  printf("clickcount:%s\n", page.click_count);
+	  printf("replaycount:%s\n", page.replay_count);
+	  printf("content:%s\n", page.content);
+*/
+   
+   	  char* deststr;
+	  int filelen = file_read_full(&deststr, argv[1]);
+	  whole_str_to_linebuf(deststr, filelen, lb); 
+	  printf("fill lb end\n");
+	  //fill_buf(argv[1], lb, 0);
+	  //file_buf_write(lb, "test.html");
 	  //test read file
+	 
+	  
 	  LineBuf* temp = lb->next;
 	  if(temp == NULL)
 	  {
 		 printf("null file\n");
 		 exit(0);
 	  }
-	  /*
-		 while(temp)
-		 {
-	  //printf("")
-	  }
-	  */
+	
 	  LineBuf* dest = (LineBuf*)malloc(sizeof(LineBuf));
 	  dest->next = NULL; 
-
+	  
 	  // illegal_part_deal(lb);
 	  //count illegal lable
 	  //test_illegal_lable(lb);
@@ -229,7 +279,14 @@ int main(int argc, char* argv[])
 
 	  if(is_discuz_flag)
 	  {
-
+		 test_illegal_lable(lb);
+		 //	  annotation_part_handle(lb);
+		 //	  printf("wipe anno end\n");
+		 illegal_part_deal(lb);
+		 test_illegal_lable(lb);
+		 //illegal_part_deal(lb);
+		 //test_illegal_lable(lb);
+		 file_buf_write(lb, "test.html");
 		 discuz_fill_the_page(lb, &page);
 		 printf("title:%s\n", page.title);
 		 printf("author:%s\n", page.author);
@@ -249,14 +306,15 @@ int main(int argc, char* argv[])
 		 test_illegal_lable(lb);
 
 		 // file_buf_write(lb, "test.html");
-		 // illegal_part_deal(lb);
+		  illegal_part_deal(lb);
 		 // printf("end twice illgel wipe\n");
-		 // test_illegal_lable(lb);
+		  test_illegal_lable(lb);
 
 		 // illegal_part_deal(lb);
 		 // test_illegal_lable(lb);
 		 //illegal_part_deal(lb);
 
+		 file_buf_write(lb, "test.html");
 		 //test_illegal_lable(lb);
 		 no_discuz_fill_the_page(lb, &page);
 		 printf("title:%s\n", page.title);
@@ -264,7 +322,6 @@ int main(int argc, char* argv[])
 	  }
 	  page_free(&page);
 	  fflush(stdout);
-   }
-
+	  
    return 0;
 }

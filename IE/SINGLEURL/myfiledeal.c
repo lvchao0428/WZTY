@@ -59,19 +59,9 @@ int fill_buf(char* filename, LineBuf* lb, int file_num)
 	  q->next = NULL;
 	  strcpy(q->str, line);
 	  q->line_no = no; 
-	  if(lb->next == NULL)
-	  {
-		 lb->next = q;
-		 q->before = lb;
-		 p = p->next;
-	  }
-	  else
-	  {
-		 p->next = q;
-		 q->before = p;
-		 p = p->next;
-	  }
-
+	  p->next = q;
+	  q->before = p;
+	  p = p->next;
    }
 
    free(line);
@@ -305,3 +295,13 @@ int read_author(char* filename, char* buf_author)
    }
 }
 
+void free_linebuf(LineBuf* lb)
+{
+   LineBuf* p = lb, * q;
+   while(p)
+   {
+	  q = p;
+	  p = p->next;
+	  free(q);
+   }
+}

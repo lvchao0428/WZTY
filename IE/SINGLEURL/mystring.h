@@ -5,6 +5,8 @@
 #include<string.h>
 #include"def.h"
 
+void whole_str_to_linebuf(char* str, int len, LineBuf* lb);
+
 void filename_tail_clean(char* filename);
 
 int mystrcmp(char* str, char* word);

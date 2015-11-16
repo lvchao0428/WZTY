@@ -35,6 +35,8 @@ typedef int LableType;
 #define SCRIPTTYPE		11
 #define STYLETYPE		12
 #define ANNOTYPE		13
+#define ESCTYPE			14
+
 
 typedef int ContentType;	//内容前面的标签类型
 
