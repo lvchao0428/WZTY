@@ -35,7 +35,7 @@ int is_discuz(LineBuf* pb)
    beglb = endlb = pb->next;
    char temphead[100000];
    temphead[0] = '\0'; 
-   while(beglb && beglb->next != NULL && mystrstr(beglb->str, "</head>") < 0)
+   while(beglb && beglb->next != NULL && mystrstr(beglb->str, "</head>") == -1)
    {
 	  strcat(temphead, beglb->str);
 	  //printf("beg:str""%s\n", beglb->str);

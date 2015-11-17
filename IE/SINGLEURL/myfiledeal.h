@@ -3,7 +3,6 @@
 
 
 #include"def.h"
-#define HTMLCOUNT 1024
 
 void file_content_batching_deal(LineBuf* lbp[HTMLCOUNT]);
 
@@ -26,6 +25,7 @@ int read_title(char* filename, char* buf_title);	//从文件读取文章的标�
 
 int read_author(char* filename, char* buf_author);	//从文件读取作者名字(discuz)
 
+void free_linebuf(LineBuf* lb);
 
 #endif
 

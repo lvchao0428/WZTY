@@ -16,7 +16,8 @@ int no_discuz_fill_the_page(LineBuf* pb, Page* page)
    int max_content_len = 0;
    LineBuf* beglb = pb->next;
    LineBuf* content_buf = (LineBuf*)malloc(sizeof(LineBuf));
-   content_buf->next = NULL;
+   //content_buf->next = NULL;
+   memset(content_buf, 0, sizeof(*content_buf));
    while(beglb != NULL)
    {
 	  line = beglb->str;
@@ -35,16 +36,16 @@ int no_discuz_fill_the_page(LineBuf* pb, Page* page)
 		 case TITLELABLE:
 			if(page->title_filled != 1)
 			{
-			   printf("title checked\n");
+			   //printf("title checked\n");
 			   deal_title(&beglb, page);
 			}
 
 			break;
 		 case CONTENTLABLE:
 			//检查所有div table标签，符合标准的一直找到标签为止
-			   printf("conetne checked!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-			  // deal_normal_content(&beglb, page, content_buf);
-			   printf("over extract contennt..........................\n\n\n");
+			  // printf("conetne checked!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+			   deal_normal_content(&beglb, page, content_buf);
+			  // printf("over extract contennt..........................\n\n\n");
 			   //test wordlen
 			   //int wordlen = word_length_get(beglg->str);
 			break;
@@ -57,15 +58,16 @@ int no_discuz_fill_the_page(LineBuf* pb, Page* page)
 		 break;
 	  }
 	  */
-	  beglb = beglb->next;
+	  if(beglb)
+		 beglb = beglb->next;
    }
 
    //find longest content
-	 LineBuf* tempcontent = content_buf->next;
-   LineBuf* longestContent;
+   LineBuf* tempcontent = content_buf->next;
+   LineBuf* longestContent = NULL;
    while(tempcontent)
    {
-	  
+
 	  int templen = strlen(tempcontent->str);
 	  
 	 // printf("str:%s\n", tempcontent->str);
@@ -91,7 +93,7 @@ int no_discuz_fill_the_page(LineBuf* pb, Page* page)
 		 page->content = (char*)malloc(sizeof(char)*20);
 		 strcpy(page->content, "NULL CONTENT");
 	  }
-	  else if(strlen(page->content) <= 20)
+	  else if(strlen(page->content) <= 10)
 	  {
 		 page->content = (char*)realloc(page->content, sizeof(char)*20);
 		 strcpy(page->content, "NULL CONTENT");
@@ -102,6 +104,8 @@ int no_discuz_fill_the_page(LineBuf* pb, Page* page)
 	  page->content = (char*)malloc(sizeof(char)*20);
 	  strcpy(page->content, "NULL CONTENT");
    }
+
+   free_linebuf(content_buf);
 }
 
 void deal_normal_content(LineBuf** lb, Page* page, LineBuf* content_buf)
@@ -131,27 +135,24 @@ void deal_normal_content(LineBuf** lb, Page* page, LineBuf* content_buf)
    }
    
    LablePosPair* lpp = (LablePosPair*)malloc(sizeof(LablePosPair));
-   lpp->next = NULL;
-   out_content_scope(tempstr, lpp);
-   //copy_scope_str_to_str(tempstr, lpp);
-   if(comma_num > 1)
-   {
-	 // printf("test comma str:%d\n", tempstr);
-   }
+   memset(lpp, 0, sizeof(*lpp));
+   find_all_greater_lower(tempstr, lpp);
+   dispos_son_lable(tempstr, lpp);
+   free_LablePosPair(lpp);
+  
    //如果符合条件，则一直搜索到标签的结尾，然后抽取所有的内容
    comma_num = find_comma_num_out(tempstr);
-  // printf("commaNum:%dstr:%s\n", comma_num, tempstr);
-   if(comma_num > 5 )//&& is_word_longer_than_lable(tempstr) == 1)
+   if(comma_num > 3 )//&& is_word_longer_than_lable(tempstr) == 1)
    {
-	  //printf("tempstr:%s\n", tempstr);
 	  extract_content_with_punct(&endlf, tempstr);
-	  
 	  //tempstr 存储处理好的内容
-	  page->content = (char*)malloc(sizeof(char)*(strlen(tempstr) + 1));
-	  strcpy(page->content, tempstr);
+	  //page->content = (char*)malloc(sizeof(char)*(strlen(tempstr) + 1));
+	  //strcpy(page->content, tempstr);
 	  
 	  LineBuf* tempbuf = (LineBuf*)malloc(sizeof(LineBuf));
-	  tempbuf->next = NULL;
+	  memset(tempbuf, 0, sizeof(*tempbuf));
+		 
+	  //tempbuf->next = NULL;
 	  tempbuf->str = (char*)malloc(sizeof(char)*(strlen(tempstr) + 1));
 	  strcpy(tempbuf->str, tempstr);
 	  
@@ -204,7 +205,7 @@ LableType check_normal_lable(LineBuf* lb, char* line)
 		 templf = templf->next;
 	  }
 	  comma_num = find_comma_num_out(tempstr);
-	  wordlen = word_length_get(tempstr);
+	 // wordlen = word_length_get(tempstr);
 	  //	printf("comma_num:%d\tlineno:%d, str:%s\n", comma_num,templf->line_no, tempstr); 
 		// printf("lineno:%d\tcontent lable possible..................................\n", lb->line_no);
 	  if(comma_num <  5)

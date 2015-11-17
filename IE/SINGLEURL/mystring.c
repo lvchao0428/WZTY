@@ -7,6 +7,40 @@
 
 #include"mystring.h"
 
+void whole_str_to_linebuf(char* str, int len, LineBuf* lb)
+{
+   //把整篇html的源码转换成按行读取的结构中。
+   LineBuf* p = lb;
+   int i = 0;
+
+   while(i < len && str[i] != 0)
+   {
+	  if(str[i] == '\n' || str[i] == '\r')
+	  {
+		 i++;
+	  }
+	  char tempstr[100000];
+	  memset(tempstr, 0, sizeof(char)*(strlen(tempstr)+1));
+	  int line_len = 0;
+	  int j = 0;
+	  while(str[i] != '\n' && str[i] != '\r' && i < len && str[i] != 0)
+	  {
+		 tempstr[j++] = str[i++];
+	  }
+	  tempstr[j] = '\0';
+	  LineBuf* q = (LineBuf*)malloc(sizeof(LineBuf));
+	  q->next = NULL;
+	  q->str = (char*)malloc(sizeof(char)*(strlen(tempstr) + 1));
+	  p->next = q;
+	  
+	  q->before = p;
+	  strcpy(q->str, tempstr);
+	  p = p->next;
+
+	  
+   }
+}
+
 
 void filename_tail_clean(char* filename)
 {
@@ -207,7 +241,7 @@ int find_comma_num_out(char* line)		//找到里面内容部分的标点数量
 	  }
 	  p = p->next;
    }
-   
+   free_LablePosPair(wordPair); 
    return comma_num;
 }
 
@@ -226,6 +260,7 @@ int word_length_get(char* line)		//获得字符串里面的内容长度
 	  wordlenSum += (p->right - p->left);
 	  p = p->next;
    }
+   free_LablePosPair(wordLpp);
    return wordlenSum;
 }
 
@@ -245,7 +280,7 @@ int lable_length_get(char* line)	//获得字符串里面的标签长度
 	  lablelenSum += (p->right - p->left);
 	  p = p->next;
    }
-
+   free_LablePosPair(lableLpp);
    return lablelenSum;
 }
 
@@ -274,8 +309,10 @@ int is_word_longer_than_lable(char* line)
    {//求出标签的总长度
 	  lableTotalLen += (p->right - p->left);
 	  p = p->next;
-   }	
-   printf("wordlen:%d    lablelen:%d\n", wordTotalLen, lableTotalLen);
+   }
+   free_LablePosPair(wordPairVector);
+   free_LablePosPair(lablePairVector);
+   //printf("wordlen:%d    lablelen:%d\n", wordTotalLen, lableTotalLen);
    return (wordTotalLen >= lableTotalLen);
 }
 

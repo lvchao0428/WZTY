@@ -13,6 +13,7 @@
 #include<math.h>
 
 
+#define HTMLCOUNT 819
 #define BUFSIZE 1024
 #define LASTLINKNUM 100
 typedef int LableType;
@@ -35,12 +36,13 @@ typedef int LableType;
 #define SCRIPTTYPE		11
 #define STYLETYPE		12
 #define ANNOTYPE		13
+#define ESCTYPE			14
 
 typedef int ContentType;	//内容前面的标签类型
 
 #define HREFTYPE		0
 #define NORMALTYPE		1
-
+#define DISCUZTYPE		2
 
 typedef struct Page
 {
@@ -56,6 +58,7 @@ typedef struct Page
    int click_filled;
    int replay_filled;
    int content_filled;
+   ContentType ct;
 }Page, *pPage;
 
 

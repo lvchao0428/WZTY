@@ -305,3 +305,18 @@ int read_author(char* filename, char* buf_author)
    }
 }
 
+
+void free_linebuf(LineBuf* lb)
+{
+   LineBuf* p = lb, * q;
+   while(p)
+   {
+	  q = p;
+	  p = p->next;
+	  if(q->str)
+	  {
+		 free(q->str);
+	  }
+	  free(q);
+   }
+}
