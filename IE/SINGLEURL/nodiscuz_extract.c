@@ -36,7 +36,11 @@ int no_discuz_fill_the_page(LineBuf* pb, Page* page)
 		 case TITLELABLE:
 			if(page->title_filled != 1)
 			{
+<<<<<<< HEAD
 			   //printf("title checked\n");
+=======
+			  // printf("title checked\n");
+>>>>>>> 4bbf6f7d3945798cbac5d053fe43d1ce7c87f581
 			   deal_title(&beglb, page);
 			}
 
@@ -64,7 +68,11 @@ int no_discuz_fill_the_page(LineBuf* pb, Page* page)
 
    //find longest content
    LineBuf* tempcontent = content_buf->next;
+<<<<<<< HEAD
    LineBuf* longestContent = NULL;
+=======
+   LineBuf* longestContent;
+>>>>>>> 4bbf6f7d3945798cbac5d053fe43d1ce7c87f581
    while(tempcontent)
    {
 
@@ -105,7 +113,12 @@ int no_discuz_fill_the_page(LineBuf* pb, Page* page)
 	  strcpy(page->content, "NULL CONTENT");
    }
 
+<<<<<<< HEAD
    free_linebuf(content_buf);
+=======
+
+  // free_linebuf()
+>>>>>>> 4bbf6f7d3945798cbac5d053fe43d1ce7c87f581
 }
 
 void deal_normal_content(LineBuf** lb, Page* page, LineBuf* content_buf)
@@ -135,11 +148,22 @@ void deal_normal_content(LineBuf** lb, Page* page, LineBuf* content_buf)
    }
    
    LablePosPair* lpp = (LablePosPair*)malloc(sizeof(LablePosPair));
+<<<<<<< HEAD
    memset(lpp, 0, sizeof(*lpp));
    find_all_greater_lower(tempstr, lpp);
    dispos_son_lable(tempstr, lpp);
    free_LablePosPair(lpp);
   
+=======
+   lpp->next = NULL;
+   out_content_scope(tempstr, lpp);
+   free_LablePosPair(lpp);
+   //copy_scope_str_to_str(tempstr, lpp);
+   if(comma_num > 1)
+   {
+	 // printf("test comma str:%d\n", tempstr);
+   }
+>>>>>>> 4bbf6f7d3945798cbac5d053fe43d1ce7c87f581
    //如果符合条件，则一直搜索到标签的结尾，然后抽取所有的内容
    comma_num = find_comma_num_out(tempstr);
    if(comma_num > 3 )//&& is_word_longer_than_lable(tempstr) == 1)

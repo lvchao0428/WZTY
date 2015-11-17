@@ -37,6 +37,10 @@ typedef int LableType;
 #define STYLETYPE		12
 #define ANNOTYPE		13
 #define ESCTYPE			14
+<<<<<<< HEAD
+=======
+
+>>>>>>> 4bbf6f7d3945798cbac5d053fe43d1ce7c87f581
 
 typedef int ContentType;	//内容前面的标签类型
 

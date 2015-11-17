@@ -5,7 +5,10 @@
 #include<string.h>
 #include"def.h"
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 4bbf6f7d3945798cbac5d053fe43d1ce7c87f581
 void whole_str_to_linebuf(char* str, int len, LineBuf* lb);
 
 void filename_tail_clean(char* filename);

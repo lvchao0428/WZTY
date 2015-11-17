@@ -85,7 +85,7 @@ void illegal_part_deal(LineBuf* lb)
    while(beglb)
    {
 //	  printf("check beglb:%s\n", beglb->str);
-	  if((mystrstr(beglb->str, "<!--")== -1) && 
+	  if((mystrstr(beglb->str, "<!--") == -1) && 
 			!(mystrstri(beglb->str, "<style")) &&
 			!(mystrstri(beglb->str, "<script")))
 	  {
@@ -169,11 +169,9 @@ void illegal_lable_wipe(LineBuf** lb, char* beglable, char* endlable)
 			if(times == 0)
 			{
 			   begLableNum--;
-			 //  printf("chose illegal script***********************************\n");
 			}
 		 }
-//		 lable_beg_end_times_fill(endlb->str, "<script", "</script>", &begLableNum, &endLableNum);
-
+		 printf("str:%s\nscript times:left:%d, right:%d\n",endlb->str,  begLableNum, endLableNum);
 	  }
 	  else
 	  {
@@ -220,39 +218,50 @@ void illegal_lable_wipe(LineBuf** lb, char* beglable, char* endlable)
 			   }
 			   
 			}
-			/*
-			LablePosPair* q2 = (LablePosPair*)malloc(sizeof(LablePosPair));
-			q2->next = NULL;
-			tempbeg = mystrstr(endlb->str + tempend, beglable);
 			
-			if(tempbeg != -1)
+			/*
+			if(strlen(endlb->str) - tempend > 5)
 			{
-			   tempbeg = tempbeg + tempend;
-			   q2->left = tempbeg;
-			   tempend = mystrstr(endlb->str + tempbeg, endlable);
-			   if(tempend != -1)
+			   LablePosPair* q2 = (LablePosPair*)malloc(sizeof(LablePosPair));
+			   q2->next = NULL;
+			   tempbeg = mystrstr(endlb->str + tempend, beglable);
+
+			   if(tempbeg != -1)
 			   {
-				  q2->right = tempend;
-				  p->next = q2;
-				  p = p->next;
+				  tempbeg = tempbeg + tempend;
+				  q2->left = tempbeg;
+				  tempend = mystrstr(endlb->str + tempbeg, endlable);
+				  if(tempend != -1)
+				  {
+					 q2->right = tempend;
+					 p->next = q2;
+					 p = p->next;
+				  }
 			   }
+
 			}
-			LablePosPair* q3 = (LablePosPair*)malloc(sizeof(LablePosPair));
-			q3->next = NULL;
-			tempbeg = mystrstr(endlb->str + tempend, beglable);
-			if(tempbeg != -1)
+
+			if(strlen(endlb->str) - tempend > 5)
 			{
-			   tempbeg = tempbeg + tempend;
-			   q3->left = tempbeg;
-			   tempend = mystrstr(endlb->str + tempbeg, endlable);
-			   if(tempend != -1)
+			   LablePosPair* q3 = (LablePosPair*)malloc(sizeof(LablePosPair));
+			   q3->next = NULL;
+			   tempbeg = mystrstr(endlb->str + tempend, beglable);
+			   if(tempbeg != -1)
 			   {
-				  q3->right = tempend;
-				  p->next = q3;
-				  p = p->next;
+				  tempbeg = tempbeg + tempend;
+				  q3->left = tempbeg;
+				  tempend = mystrstr(endlb->str + tempbeg, endlable);
+				  if(tempend != -1)
+				  {
+					 q3->right = tempend;
+					 p->next = q3;
+					 p = p->next;
+				  }
 			   }
+
 			}
 			*/
+
 		 }//end if anno
 		 else
 		 {//开始处理注释标签的单行情况
@@ -271,12 +280,12 @@ void illegal_lable_wipe(LineBuf** lb, char* beglable, char* endlable)
 				  //在找到一个开始注释标签以后直接原地寻找结束标签
 				  while(i < len) 
 				  {
-					if(c[i] == '-' && c[i+1] == '-' && c[i+2] == '>')
-					{
-					   q->right = i+2;
-					   i+=2;
-					}
-					i++;
+					 if(c[i] == '-' && c[i+1] == '-' && c[i+2] == '>')
+					 {
+						q->right = i+2;
+						i+=2;
+					 }
+					 i++;
 				  }
 			   }// end if
 			   i++;
@@ -284,16 +293,22 @@ void illegal_lable_wipe(LineBuf** lb, char* beglable, char* endlable)
 
 		 }//end else
 		 //test lpp
-	//	 printf("lieno:%d,\ttest lpp\n", endlb->line_no);
-//		 test_lpp(templpp);
+		 //	 printf("lieno:%d,\ttest lpp\n", endlb->line_no);
+		 //		 test_lpp(templpp);
 
 		 //后处理之前标记的标签组，删除不合理项（间距过近）
 		 p = templpp->next;
 		 if(p == NULL)
+<<<<<<< HEAD
 		 {//如果没有非法标签
 			return;
 		 }
 		 
+=======
+		 {//如果没有非法标签			
+			return;
+		 }
+>>>>>>> 4bbf6f7d3945798cbac5d053fe43d1ce7c87f581
 		 //如果是只有一对非法标签
 
 		 if(p->next == NULL)
@@ -412,7 +427,6 @@ void illegal_lable_wipe(LineBuf** lb, char* beglable, char* endlable)
 			   endlb = endlb->next;
 			}	
 		 }
-		 /*
 		 else
 		 {
 			while(endlb && (mystrstr(endlb->str, endlable) != -1) && (mystrstr(endlb->str, beglable) != -1))
@@ -421,7 +435,6 @@ void illegal_lable_wipe(LineBuf** lb, char* beglable, char* endlable)
 			   endlb = endlb->next;
 			}
 		 }
-		*/
 		 
 
 		 if(endlb == NULL)
@@ -459,7 +472,7 @@ void illegal_lable_wipe(LineBuf** lb, char* beglable, char* endlable)
 
 		 }
 
-		 if(needToBeDeleteLb == endlb)
+		 if(needToBeDeleteLb && needToBeDeleteLb == endlb)
 		 {
 			if(endlb->next != NULL)
 			{
@@ -479,7 +492,7 @@ void illegal_lable_wipe(LineBuf** lb, char* beglable, char* endlable)
 			   free_linebuf(q);
 			}
 		 }//needToBeDeleteLb != endlb
-		 else if(needToBeDeleteLb->next && needToBeDeleteLb->next == endlb)
+		 else if(needToBeDeleteLb && needToBeDeleteLb->next && needToBeDeleteLb->next == endlb)
 		 {
 		//	printf("need == endl\n");
 
@@ -511,8 +524,8 @@ void illegal_lable_wipe(LineBuf** lb, char* beglable, char* endlable)
 		 temptemplb->str = (char*)realloc(temptemplb->str, sizeof(char)*(buffLen+1));
 		 strcpy(temptemplb->str, tempstr);
 
-		 //printf("mul_len:%d %s\n", buffLen, temptemplb->str);
-		 //printf("before:buflineno:%d\n", temptemplb->line_no);
+		 printf("mul_len:%d %s\n", buffLen, temptemplb->str);
+		 printf("before:buflineno:%d\n", temptemplb->line_no);
 
 		 
 		 *lb = (temptemplb->before);
@@ -687,7 +700,11 @@ LableType check_lable(char* line)
    if(mystrstr(line, "<title") != -1)
    {
 	  lt = TITLELABLE;
+<<<<<<< HEAD
 //	  printf("title checked\n");
+=======
+	 // printf("title checked\n");
+>>>>>>> 4bbf6f7d3945798cbac5d053fe43d1ce7c87f581
 	//  printf("title:%s\n", line);
    }
    //内容标签里面有可能包含的authi
@@ -695,27 +712,44 @@ LableType check_lable(char* line)
    {
 	  lt = AUTHORLABLE;
 
+<<<<<<< HEAD
 //	  printf("author checked\n");
+=======
+	  //printf("author checked\n");
+>>>>>>> 4bbf6f7d3945798cbac5d053fe43d1ce7c87f581
 	 // printf("author:%s\n", line);
    }
    else if(mystrstr(line, "authorposton") != -1)
    {
 	  lt = TIMELABLE;
+<<<<<<< HEAD
 //	  printf("time checked\n");
+=======
+	 // printf("time checked\n");
+>>>>>>> 4bbf6f7d3945798cbac5d053fe43d1ce7c87f581
 
 	//  printf("time:%s\n", line);
    }
    else if(mystrstr(line, "查看")!= -1 || mystrstr(line, "回复") != -1)
    {
 	  lt = REPLAYLABLE;
+<<<<<<< HEAD
 //	  printf("replay checked\n");
+=======
+	 // printf("replay checked\n");
+>>>>>>> 4bbf6f7d3945798cbac5d053fe43d1ce7c87f581
    }
    else if((mystrstr(line, "<table") != -1) &&((mystrstr(line, "postmessage") != -1)||
 			(mystrstr(line, "\"pid") != -1)))
    {//此个网页内容部分包含在talbe中，以后可以在这里扩展内容页可能存在的标签
 	  lt = CONTENTLABLE;
+<<<<<<< HEAD
 //	  printf("content checked\n");
 //	  printf("content:%s\n", line);
+=======
+	 // printf("content checked\n");
+	 // printf("content:%s\n", line);
+>>>>>>> 4bbf6f7d3945798cbac5d053fe43d1ce7c87f581
    }
 
    return lt;
@@ -734,17 +768,26 @@ void find_all_greater_lower(char* line, LablePosPair* lpp)
    
    while(line[i] != '\0')
    {
+<<<<<<< HEAD
 
 	  LablePosPair* q = (LablePosPair*)malloc(sizeof(LablePosPair));
 	  if(line[i] == '<' && ((line[i+1] >= 'a' && line[i+1] <= 'z') || (line[i+1] == '/') || (line[i+1] == '!') || (line[i+1] >= 'A' && line[i+1] <= 'Z')))
 	  {
 		
+=======
+	  
+	  LablePosPair* q = (LablePosPair*)malloc(sizeof(LablePosPair));
+	  if((line[i] == '<' && ((line[i+1] >= 'a' && line[i+1] <= 'z') || \
+				  (line[i+1] == '/') || (line[i+1] == '!') ||	\
+				  (line[i+1] >= 'A' && line[i+1] <= 'Z'))) ) 	
+	  {
+>>>>>>> 4bbf6f7d3945798cbac5d053fe43d1ce7c87f581
 		 q->left = i;
 		 q->next = NULL;
 		 p->next = q;
 		 p->next->before = p;
 		 p = p->next;
-
+		
 		 //看后面是否是链接类型
 		 if(scope_str_cmp(line, "<a ", i))
 		 {// is a link lable
@@ -809,12 +852,15 @@ void find_all_greater_lower(char* line, LablePosPair* lpp)
 			i += 5;	 
 			p->right = i;	
 			p = p->next;
+<<<<<<< HEAD
 
+=======
+			
+>>>>>>> 4bbf6f7d3945798cbac5d053fe43d1ce7c87f581
 		 }
 	  }
 
    }
-   
  
 }
 
@@ -949,7 +995,11 @@ int deal_adver(char* tempstr, LablePosPair* lpp, LablePosPair* lastlpp[LASTLINKN
    count = 0;
    LablePosPair* beglpp,* endlpp;
   
+<<<<<<< HEAD
   // printf("begin check end commercial:\n");
+=======
+//   printf("begin check end commercial:\n");
+>>>>>>> 4bbf6f7d3945798cbac5d053fe43d1ce7c87f581
    while(p && p->next)
    {
 	  //找到一个最近的广告标签,现在只能找到一个广告群
@@ -1010,9 +1060,15 @@ int deal_adver(char* tempstr, LablePosPair* lpp, LablePosPair* lastlpp[LASTLINKN
 
    if(count > 3)
    {
+<<<<<<< HEAD
 	 // printf("has commercial\n");
 	 // test_scope_lpp(beglpp, endlpp, tempstr);
 	 // printf("end commercial\n");
+=======
+	  //printf("has commercial\n");
+	  test_scope_lpp(beglpp, endlpp, tempstr);
+	  //printf("end commercial\n");
+>>>>>>> 4bbf6f7d3945798cbac5d053fe43d1ce7c87f581
    }
 
    //开始标签找到之前没有标点的区域
@@ -1030,9 +1086,15 @@ int deal_adver(char* tempstr, LablePosPair* lpp, LablePosPair* lastlpp[LASTLINKN
 	  }
    }
    //把广告链接合并成一个pair
+<<<<<<< HEAD
    //printf("test full commercial\n");
    //test_scope_lpp(tempbeg, endlpp, tempstr); 
    //printf("end full commercial\n");
+=======
+  // printf("test full commercial\n");
+  // test_scope_lpp(tempbeg, endlpp, tempstr); 
+  // printf("end full commercial\n");
+>>>>>>> 4bbf6f7d3945798cbac5d053fe43d1ce7c87f581
    
    while(tempbeg && tempbeg != endlpp)
    {
@@ -1114,6 +1176,14 @@ int extract_content_with_punct(LineBuf** lb, char* line)
 		 templf = templf->next;
 		 step++;
 	  }
+<<<<<<< HEAD
+=======
+	  //templf = templf->next;
+	  LablePosPair* templpp = (LablePosPair*)malloc(sizeof(LablePosPair));
+	  templpp->next = NULL;
+	  out_content_scope(temptempstr, templpp);	//找到最近三行的所有标签和标点数量
+	  free_LablePosPair(templpp);
+>>>>>>> 4bbf6f7d3945798cbac5d053fe43d1ce7c87f581
 	  int comma_num = find_comma_num_out(temptempstr);
 	  //free_LablePosPair(templpp);
 	  
@@ -1147,10 +1217,25 @@ int extract_content_with_punct(LineBuf** lb, char* line)
    }
    find_all_greater_lower(tempstr, lpp);
    
+<<<<<<< HEAD
+=======
+   //test_lpp(lpp, tempstr);
+
+   // int comNum = find_comma_num_out(tempstr);
+  // LablePosPair* lastlpp[LASTLINKNUM];
+>>>>>>> 4bbf6f7d3945798cbac5d053fe43d1ce7c87f581
    //这里提取的区域仍然较大，需要把广告链接等去掉
    //   deal_adver(tempstr, lpp, lastlpp);
    dispos_son_lable(tempstr, lpp);
    free_LablePosPair(lpp);
+<<<<<<< HEAD
+=======
+   //
+   //
+   //out_content_scope(tempstr, lpp);
+   //copy_scope_str_to_str(tempstr, lpp);
+  // printf("commanum:%d\n", comNum);
+>>>>>>> 4bbf6f7d3945798cbac5d053fe43d1ce7c87f581
    strcpy(line, tempstr);
    *lb = templf;
 }

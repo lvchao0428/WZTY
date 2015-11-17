@@ -14,7 +14,11 @@ int discuz_fill_the_page(LineBuf* pb, Page* page)
 {//提取论坛内容
    
    int has_post = has_postmessage(pb);
+<<<<<<< HEAD
 //   printf("has_post:%d\n", has_post);
+=======
+   //printf("has_post:%d\n", has_post);
+>>>>>>> 4bbf6f7d3945798cbac5d053fe43d1ce7c87f581
    char* line = NULL;
    LineBuf* p = pb->next;
    
@@ -38,18 +42,27 @@ int discuz_fill_the_page(LineBuf* pb, Page* page)
 			//有可能是title项
 			if(page->title_filled != 1)
 			{//如果标题项还没有被填充过，则把之后内容当做标题处理
+<<<<<<< HEAD
 		//	   printf("deal title\n");
 			   deal_title(&p, page);
 			}
 			
 		//	printf("title type ,%s\n", line);
+=======
+			   deal_title(&p, page);
+			}
+			
+>>>>>>> 4bbf6f7d3945798cbac5d053fe43d1ce7c87f581
 			break;
 		 case CONTENTLABLE:
 			if(page->content_filled != 1)
 			{//如果可能是内容选项，而且还没有被填充过，则当内容项处理时候的内容
 			   deal_content(&p, page, has_post);
 			}
+<<<<<<< HEAD
 			//printf("content type ,%s\n", line);
+=======
+>>>>>>> 4bbf6f7d3945798cbac5d053fe43d1ce7c87f581
 			break;
 		 case AUTHORLABLE:
 			if(page->author_filled != 1)
@@ -75,6 +88,8 @@ int discuz_fill_the_page(LineBuf* pb, Page* page)
 	  }
 	  p = p->next;
    }
+
+   
 }
 
 //提取时间信息
@@ -84,30 +99,16 @@ int deal_time(LineBuf** lf, Page* page)
    LineBuf* endlf = templf;
    char* line = endlf->str;
    char tempstr[200] = {0};
-  // printf("str: %s\n", endlf->str); 
-   //int begPos = 0, endPos = 0;
-   //find begPos
    LablePosPair* lpp = (LablePosPair*)malloc(sizeof(LablePosPair));
    lpp->next = NULL;
-  // printf("time:%s\n", endlf->str);
    find_all_greater_lower(line, lpp);
    strcpy(tempstr, line);
-/*
-   while(line[begPos] != '\0' && line[begPos++] != '>');
-   endPos = begPos;
-  */ 
-  // printf("time begin: %d\n", begPos);
-   //find endPos
-  
-   //while(line[endPos] != '\0' && line[endPos] != '<') endPos++;
-   
-  // printf("time end: %d\n", endPos);
  
    page->time = (char*)malloc(sizeof(char)*(strlen(line) + 1));
 
    dispos_son_lable(tempstr, lpp);
+   free_LablePosPair(lpp);
    strcpy(page->time, tempstr);
-   //mystrcpy(page->time, line, begPos, endPos);
    page->time_filled = 1;
    *lf = templf->next;
    return 1;
@@ -135,7 +136,7 @@ int deal_clickAndreplay(LineBuf** lf, Page* page)
 	  replay_beg_pos += mystrstr(endlf->str + replay_beg_pos, "<span");
 	  replay_end_pos = replay_beg_pos + return_son_str_pos(endlf->str + replay_beg_pos, "</span>");
 
-
+	  
 	  char temp_check_str[100] = {0};
 	  char temp_replay_str[100] = {0};
 	  mystrcpy(temp_check_str, endlf->str, check_beg_pos, check_end_pos);
@@ -154,15 +155,25 @@ int deal_clickAndreplay(LineBuf** lf, Page* page)
 	  find_all_greater_lower(temp_check_str, check_lpp);
 	  //test_lpp(check_lpp, temp_check_str);
 	  dispos_son_lable(temp_check_str, check_lpp);
+<<<<<<< HEAD
 	  free_LablePosPair(check_lpp);
+=======
+	  free_LablePosPair(check_lpp); 
+>>>>>>> 4bbf6f7d3945798cbac5d053fe43d1ce7c87f581
 	  //提取回复的次数
 	  LablePosPair* replay_lpp = (LablePosPair*)malloc(sizeof(LablePosPair));
 	  replay_lpp->next = NULL;
 	  find_all_greater_lower(temp_replay_str, replay_lpp);
+<<<<<<< HEAD
 //	  test_lpp(replay_lpp, temp_replay_str);
 	  dispos_son_lable(temp_replay_str, replay_lpp);
 	  free_LablePosPair(replay_lpp);
 
+=======
+	 // test_lpp(replay_lpp, temp_replay_str);
+	  dispos_son_lable(temp_replay_str, replay_lpp);
+	  free_LablePosPair(replay_lpp);
+>>>>>>> 4bbf6f7d3945798cbac5d053fe43d1ce7c87f581
 	  page->click_count = (char*)malloc(sizeof(char)*(strlen(temp_check_str) + 1));
 	  strcpy(page->click_count, temp_check_str);
 
@@ -244,6 +255,10 @@ int deal_author(LineBuf** lf, Page* page)
    lpp->next = NULL;
    find_all_greater_lower(tempstr, lpp);
    dispos_son_lable(tempstr, lpp);
+<<<<<<< HEAD
+=======
+   //free lpp
+>>>>>>> 4bbf6f7d3945798cbac5d053fe43d1ce7c87f581
    free_LablePosPair(lpp);
    strcpy(page->author, tempstr);
    *lf = endlf->next;
@@ -320,6 +335,7 @@ int deal_content(LineBuf** lf, Page* page, int has_post)
    }
    else if(mystrstr(endlf->str, "\"pid") != -1 && has_post == -1)
    {
+	  /*
 	  //查找下面10行。然后检查正文长度，和标点
 	  //int count = 10;
 
@@ -336,6 +352,20 @@ int deal_content(LineBuf** lf, Page* page, int has_post)
 	  endlf = templf;
 	  while(endlf && mystrstr(endlf->str, "</table>") == -1)
 	  {
+<<<<<<< HEAD
+=======
+	  strcat(tempstr, endlf->str);
+	  endlf = endlf->next;
+	  count--;
+	  }
+	  */
+	  // int word_len = word_length_get(tempstr);
+	  // if(word_len > 10)
+	  // {
+	  tempstr[0] = '\0';
+	  while(endlf != NULL && mystrstr(endlf->str, "</table>") == -1)
+	  {
+>>>>>>> 4bbf6f7d3945798cbac5d053fe43d1ce7c87f581
 		 strcat(tempstr, endlf->str);
 		 endlf = endlf->next;
 	  }
@@ -349,18 +379,22 @@ int deal_content(LineBuf** lf, Page* page, int has_post)
 	  strcpy(page->content, tempstr);
 
 	  page->content_filled = 1;
+<<<<<<< HEAD
 	  //}
+=======
+>>>>>>> 4bbf6f7d3945798cbac5d053fe43d1ce7c87f581
 	  *lf = endlf->next;
    }
 
    return 1;
-}
+   }
 
-//处理标题
+   //处理标题
 int deal_title(LineBuf** lf, Page* page)
 {
    LineBuf* templf = *lf;
    char temptitle[10000];
+   //printf("test title str:%s\n", templf->str);
    int begPos = -1, endPos = -1;
    strcpy(temptitle, templf->str);
    LablePosPair* lpp = (LablePosPair*)malloc(sizeof(LablePosPair));
@@ -370,10 +404,16 @@ int deal_title(LineBuf** lf, Page* page)
    temptitle[endPos+1] = '\0';
    find_all_greater_lower(temptitle, lpp);
    //test_lpp(lpp, temptitle);
+<<<<<<< HEAD
 
    dispos_son_lable(temptitle, lpp);
    free_LablePosPair(lpp);
 //   printf("title:%s\n", temptitle);
+=======
+   dispos_son_lable(temptitle, lpp);
+   free_LablePosPair(lpp);
+   //printf("title:%s\n", temptitle);
+>>>>>>> 4bbf6f7d3945798cbac5d053fe43d1ce7c87f581
    
 
 

@@ -4,6 +4,8 @@
 
 #include"def.h"
 
+
+
 void file_content_batching_deal(LineBuf* lbp[HTMLCOUNT]);
 
 int fill_buf(char* filename, LineBuf* lb, int file_num);	//把文件内容读取到linebuf里面

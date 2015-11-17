@@ -12,10 +12,14 @@ void whole_str_to_linebuf(char* str, int len, LineBuf* lb)
    //把整篇html的源码转换成按行读取的结构中。
    LineBuf* p = lb;
    int i = 0;
+<<<<<<< HEAD
    if(!str || len == 0)
    {
 	  return;
    }
+=======
+
+>>>>>>> 4bbf6f7d3945798cbac5d053fe43d1ce7c87f581
    while(i < len && str[i] != 0)
    {
 	  if(str[i] == '\n' || str[i] == '\r')
@@ -43,7 +47,10 @@ void whole_str_to_linebuf(char* str, int len, LineBuf* lb)
 	  
    }
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> 4bbf6f7d3945798cbac5d053fe43d1ce7c87f581
 
 void filename_tail_clean(char* filename)
 {
@@ -107,8 +114,10 @@ int mystrstr(char* father, char* son)
 {//测试前面的字符串是否包含后面字符串,返回son在father里面出现的开始位置
    int i = 0;
    int pos = 0;
-   while(father[i] != '\0')
+   //printf("father:%s, son:%s\n", father, son);
+   while(father && father[i] != '\0')
    {
+	  //printf("i:%d char:%c\n", i, father[i]);
 	  int j = 0;
 	  if(father[i] == son[j])
 	  {
@@ -131,7 +140,7 @@ int mystrstr(char* father, char* son)
 	  }
 	  i++;
    }
-   if(father[i] == '\0')
+   if(father && father[i] == '\0')
    {
 	  return -1;
    }
@@ -324,9 +333,13 @@ int is_word_longer_than_lable(char* line)
    {//求出标签的总长度
 	  lableTotalLen += (p->right - p->left);
 	  p = p->next;
+<<<<<<< HEAD
    }
    free_LablePosPair(wordPairVector);
    free_LablePosPair(lablePairVector);
+=======
+   }	
+>>>>>>> 4bbf6f7d3945798cbac5d053fe43d1ce7c87f581
    //printf("wordlen:%d    lablelen:%d\n", wordTotalLen, lableTotalLen);
    return (wordTotalLen >= lableTotalLen);
 }
@@ -500,7 +513,7 @@ int lable_beg_end_times_fill(char* str, char* beglable, char* endlable, int* beg
    beglableCount = find_str_times(str, beglable);
    endlableCount = find_str_times(str, endlable);
 	  
-   printf("str:%s\nbeglable:%s,times:%d, endlable:%s,times:%d\n", str, beglable, beglableCount\
+//   printf("str:%s\nbeglable:%s,times:%d, endlable:%s,times:%d\n", str, beglable, beglableCount\
 		 , endlable, endlableCount);
    //  return 1;
    if(beglableCount > endlableCount && beglableCount >= 2)
