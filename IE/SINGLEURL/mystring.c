@@ -12,7 +12,10 @@ void whole_str_to_linebuf(char* str, int len, LineBuf* lb)
    //把整篇html的源码转换成按行读取的结构中。
    LineBuf* p = lb;
    int i = 0;
-
+   if(!str || len == 0)
+   {
+	  return;
+   }
    while(i < len && str[i] != 0)
    {
 	  if(str[i] == '\n' || str[i] == '\r')
@@ -58,6 +61,14 @@ void filename_tail_clean(char* filename)
 int mystrcmp(char* str, char* word)
 {
    int i = 0;
+   if(!str)
+   {
+	  return 0;
+   }
+   if(!word)
+   {
+	  return 1;
+   }
    while(str[i] != '\0')
    {
 	  if(character_to_lower(str[i]) != word[i])
@@ -71,6 +82,10 @@ int mystrcmp(char* str, char* word)
 
 const char* mystrstri(const char* str, const char* subStr)
 {
+   if(!str)
+   {
+	  return NULL;
+   }
    int len = strlen(subStr);
    if(len == 0)
    {
